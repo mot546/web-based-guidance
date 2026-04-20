@@ -1,124 +1,148 @@
 /* This targets everything on the page */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box; /* Crucial for layout math */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* Crucial for layout math */
 }
 
 /* Ensure the root elements take up 100% of the height */
-html, body, #app {
-    height: 100%;
-    width: 100%;
-    overflow-x: hidden; /* Prevents accidental side-scrolling */
+html,
+body,
+#app {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden; /* Prevents accidental side-scrolling */
 }
 
 body {
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* --- MOBILE RESPONSIVE OVERRIDES --- */
 
 @media (max-width: 768px) {
-    /* 1. Global Layout Adjustments */
-    .student-container, .admin-container {
-        flex-direction: column; /* Stack sidebar on top of content */
-    }
+  /* 1. Global Layout Adjustments */
+  .student-container,
+  .admin-container {
+    flex-direction: column; /* Stack sidebar on top of content */
+  }
 
-    /* 2. Sidebar to Top-Nav transformation */
-    .sidebar, .admin-sidebar {
-        width: 100%;
-        height: auto;
-        position: relative; /* No longer fixed to the side */
-        padding: 10px 0;
-    }
+  /* 2. Sidebar to Top-Nav transformation */
+  .sidebar,
+  .admin-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative; /* No longer fixed to the side */
+    padding: 10px 0;
+  }
 
-    .sidebar h2, .admin-sidebar .brand {
-        padding: 10px 20px;
-        border-bottom: none;
-        justify-content: center;
-    }
+  .sidebar h2,
+  .admin-sidebar .brand {
+    padding: 10px 20px;
+    border-bottom: none;
+    justify-content: center;
+  }
 
-    .sidebar nav, .admin-sidebar nav {
-        display: flex; /* Horizontal menu */
-        justify-content: space-around;
-        margin-top: 0;
-    }
+  .sidebar nav,
+  .admin-sidebar nav {
+    display: flex; /* Horizontal menu */
+    justify-content: space-around;
+    margin-top: 0;
+  }
 
-    .nav-item, .nav-btn {
-        flex-direction: column; /* Stack icon over text */
-        align-items: center;
-        gap: 5px;
-        font-size: 0.75rem;
-        padding: 10px 5px;
-        text-align: center;
-    }
+  .nav-item,
+  .nav-btn {
+    flex-direction: column; /* Stack icon over text */
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    padding: 10px 5px;
+    text-align: center;
+  }
 
-    .nav-item i, .nav-btn i {
-        margin-right: 0;
-    }
+  .nav-item i,
+  .nav-btn i {
+    margin-right: 0;
+  }
 
-    /* 3. Content Area Adjustments */
-    .content-area, .admin-main {
-        margin-left: 0; /* Remove the gap meant for the sidebar */
-        padding: 20px;
-    }
+  /* 3. Content Area Adjustments */
+  .content-area,
+  .admin-main {
+    margin-left: 0; /* Remove the gap meant for the sidebar */
+    padding: 20px;
+  }
 
-    header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
 
-    .stats-grid {
-        grid-template-columns: 1fr; /* One card per row */
-    }
+  .stats-grid {
+    grid-template-columns: 1fr; /* One card per row */
+  }
 
-    /* 4. Table to Card transformation (Admin) */
-    table, thead, tbody, th, td, tr {
-        display: block; /* Tables don't fit on mobile, so we stack rows */
-    }
+  /* 4. Table to Card transformation (Admin) */
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr {
+    display: block; /* Tables don't fit on mobile, so we stack rows */
+  }
 
-    thead tr {
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-    }
+  thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
 
-    tr {
-        border: 1px solid #ddd;
-        margin-bottom: 10px;
-        border-radius: 8px;
-        background: white;
-    }
+  tr {
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    background: white;
+  }
 
-    td {
-        border: none;
-        position: relative;
-        padding-left: 50%; /* Make room for a label */
-        text-align: right;
-    }
+  td {
+    border: none;
+    position: relative;
+    padding-left: 50%; /* Make room for a label */
+    text-align: right;
+  }
 
-    td:before {
-        position: absolute;
-        left: 15px;
-        width: 45%;
-        white-space: nowrap;
-        font-weight: bold;
-        text-align: left;
-        color: #7f8c8d;
-    }
+  td:before {
+    position: absolute;
+    left: 15px;
+    width: 45%;
+    white-space: nowrap;
+    font-weight: bold;
+    text-align: left;
+    color: #7f8c8d;
+  }
 
-    /* Labels for the mobile "table" */
-    td:nth-of-type(1):before { content: "Student"; }
-    td:nth-of-type(2):before { content: "Category"; }
-    td:nth-of-type(3):before { content: "Date/Time"; }
-    td:nth-of-type(4):before { content: "Status"; }
-    td:nth-of-type(5):before { content: "Actions"; }
+  /* Labels for the mobile "table" */
+  td:nth-of-type(1):before {
+    content: "Student";
+  }
+  td:nth-of-type(2):before {
+    content: "Category";
+  }
+  td:nth-of-type(3):before {
+    content: "Date/Time";
+  }
+  td:nth-of-type(4):before {
+    content: "Status";
+  }
+  td:nth-of-type(5):before {
+    content: "Actions";
+  }
 
-    /* 5. Login/Register Adjustments */
-    .auth-card {
-        margin: 20px;
-        padding: 1.5rem;
-    }
+  /* 5. Login/Register Adjustments */
+  .auth-card {
+    margin: 20px;
+    padding: 1.5rem;
+  }
 }

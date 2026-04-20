@@ -1,7 +1,8 @@
-import './styles/admin.css';
+import "./styles/admin.css";
+
 export function renderAdminView(root, session) {
-    // 1. Build the Admin Dashboard Structure
-    root.innerHTML = `
+  // 1. Build the Admin Dashboard Structure
+  root.innerHTML = `
         <div class="admin-container">
             <aside class="admin-sidebar">
                 <div class="brand">
@@ -63,23 +64,26 @@ export function renderAdminView(root, session) {
         </div>
     `;
 
-    // 2. Load the initial data into the table
-    loadAdminData();
+  // 2. Load the initial data into the table
+  loadAdminData();
 
-    // 3. Attach Listeners
-    setupAdminListeners();
+  // 3. Attach Listeners
+  setupAdminListeners();
 }
 
 function loadAdminData() {
-    const tableBody = document.getElementById('appointmentsBody');
-    const appointments = JSON.parse(localStorage.getItem('gh_appointments')) || [];
+  const tableBody = document.getElementById("appointmentsBody");
+  const appointments =
+    JSON.parse(localStorage.getItem("gh_appointments")) || [];
 
-    if (appointments.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="6" class="empty-row">No appointment requests found.</td></tr>`;
-        return;
-    }
+  if (appointments.length === 0) {
+    tableBody.innerHTML = `<tr><td colspan="6" class="empty-row">No appointment requests found.</td></tr>`;
+    return;
+  }
 
-    tableBody.innerHTML = appointments.map(app => `
+  tableBody.innerHTML = appointments
+    .map(
+      (app) => `
         <tr>
             <td>${app.studentName}</td>
             <td>${app.date}</td>
@@ -95,23 +99,25 @@ function loadAdminData() {
                 </button>
             </td>
         </tr>
-    `).join('');
+    `,
+    )
+    .join("");
 }
 
 function setupAdminListeners() {
-    // Logout Logic
-    document.getElementById('logoutBtn').onclick = () => {
-        localStorage.removeItem('gh_session');
-        window.location.reload();
-    };
+  // Logout Logic
+  document.getElementById("logoutBtn").onclick = () => {
+    localStorage.removeItem("gh_session");
+    window.location.reload();
+  };
 
-    // Search Logic
-    document.getElementById('tableSearch').onkeyup = (e) => {
-        const term = e.target.value.toLowerCase();
-        const rows = document.querySelectorAll('#appointmentsBody tr');
-        rows.forEach(row => {
-            const text = row.innerText.toLowerCase();
-            row.style.display = text.includes(term) ? '' : 'none';
-        });
-    };
+  // Search Logic
+  document.getElementById("tableSearch").onkeyup = (e) => {
+    const term = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll("#appointmentsBody tr");
+    rows.forEach((row) => {
+      const text = row.innerText.toLowerCase();
+      row.style.display = text.includes(term) ? "" : "none";
+    });
+  };
 }

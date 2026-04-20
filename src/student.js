@@ -1,7 +1,8 @@
-import './styles/student.css';
+import "./styles/student.css";
+
 export function renderStudentView(root, session) {
-    // 1. Create the Layout Structure
-    root.innerHTML = `
+  // 1. Create the Layout Structure
+  root.innerHTML = `
         <div class="student-container">
             <aside class="sidebar">
                 <h2><i class="material-icons">school</i> Granby Gateway</h2>
@@ -52,20 +53,20 @@ export function renderStudentView(root, session) {
         </div>
     `;
 
-    // 2. Attach Event Listeners
-    setupStudentListeners();
+  // 2. Attach Event Listeners
+  setupStudentListeners();
 }
 
 function setupStudentListeners() {
-    // Logout logic (calling the function we defined in index.js)
-    document.getElementById('logoutBtn').onclick = () => {
-        localStorage.removeItem('gh_session');
-        window.location.reload();
-    };
+  // Logout logic (calling the function we defined in index.js)
+  document.getElementById("logoutBtn").onclick = () => {
+    localStorage.removeItem("gh_session");
+    window.location.reload();
+  };
 
-    // Placeholder for Navigation Logic
-    document.getElementById('nav-book').onclick = () => {
-        const content = document.getElementById('dynamic-content');
-        content.innerHTML = '<h3>Booking Form Coming Soon...</h3>';
-    };
+  // Placeholder for Navigation Logic
+  document.getElementById("nav-book").onclick = () => {
+    const content = document.getElementById("dynamic-content");
+    content.innerHTML = "<h3>Booking Form Coming Soon...</h3>";
+  };
 }

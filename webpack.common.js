@@ -9,12 +9,12 @@ export default {
     path: path.resolve(import.meta.dirname, "dist"),
     clean: true,
   },
- plugins: [
+  plugins: [
     new HtmlWebpackPlugin({
       template: "./src/index.html",
     }),
   ],
- module: {
+  module: {
     rules: [
       {
         test: /\.css$/i,
@@ -30,4 +30,4 @@ export default {
       },
     ],
   },
-}
+};
