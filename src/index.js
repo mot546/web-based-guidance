@@ -9,7 +9,13 @@ const seedUsers = () => {
   if (!existingUsers) {
     const initialUsers = [
       { id: 1, user: "student", pass: "123", role: "student", name: "Alice" },
-      { id: 2, user: "admin", pass: "123", role: "admin", name: "Counselor Ramos" },
+      {
+        id: 2,
+        user: "admin",
+        pass: "123",
+        role: "admin",
+        name: "Counselor Ramos",
+      },
     ];
     localStorage.setItem("gh_users", JSON.stringify(initialUsers));
   }
