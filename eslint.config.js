@@ -18,7 +18,7 @@ export default [
     ignores: ["dist/**", "node_modules/**", "webpack.*.js"],
   },
   // ---------------------------------------------
-  
+
   js.configs.recommended,
   ...compat.extends("eslint-config-airbnb-base"),
   {
@@ -41,7 +41,7 @@ export default [
       "no-use-before-define": "off",
       "no-alert": "off",
       "consistent-return": "off",
-      "no-shadow": "off",   // Silences the 'n already declared' errors
+      "no-shadow": "off", // Silences the 'n already declared' errors
       "no-plusplus": "off", // Allows i++
     },
   },

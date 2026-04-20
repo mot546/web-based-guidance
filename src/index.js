@@ -14,7 +14,7 @@ const seedUsers = () => {
         user: "admin",
         pass: "123",
         role: "admin",
-        name: "Counselor Ramos",
+        name: "Mr. Bossbeza",
       },
     ];
     localStorage.setItem("gh_users", JSON.stringify(initialUsers));
