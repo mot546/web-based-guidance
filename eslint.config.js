@@ -30,13 +30,13 @@ export default [
       "import/extensions": "off",
       "import/no-extraneous-dependencies": "off",
       "no-underscore-dangle": ["error", { allow: ["__filename", "__dirname"] }],
-      
+
       // 3. Add these specific overrides to fix your 12 errors:
-      "no-param-reassign": ["error", { "props": false }], // Allows root.innerHTML = ...
-      "import/prefer-default-export": "off",              // Allows named exports
-      "no-use-before-define": "off",                      // Allows calling functions before they are written
-      "no-alert": "off",                                  // Allows alert()
-      "consistent-return": "off"                          // Stops demanding 'return' in all paths
+      "no-param-reassign": ["error", { props: false }], // Allows root.innerHTML = ...
+      "import/prefer-default-export": "off", // Allows named exports
+      "no-use-before-define": "off", // Allows calling functions before they are written
+      "no-alert": "off", // Allows alert()
+      "consistent-return": "off", // Stops demanding 'return' in all paths
     },
   },
   eslintConfigPrettier,

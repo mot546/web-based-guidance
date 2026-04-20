@@ -3,6 +3,19 @@ import { renderStudentView } from "./student.js";
 import { renderAdminView } from "./admin.js";
 import "./styles/styles.css";
 
+// --- DATABASE SEEDING ---
+const seedUsers = () => {
+  const existingUsers = localStorage.getItem("gh_users");
+  if (!existingUsers) {
+    const initialUsers = [
+      { id: 1, user: "student", pass: "123", role: "student", name: "Alice" },
+      { id: 2, user: "admin", pass: "123", role: "admin", name: "Counselor Ramos" },
+    ];
+    localStorage.setItem("gh_users", JSON.stringify(initialUsers));
+  }
+};
+seedUsers();
+
 // --- HANDLERS ---
 function handleLogin(u, p) {
   const users = JSON.parse(localStorage.getItem("gh_users")) || [];
@@ -44,10 +57,10 @@ function initApp() {
     // Pass the handlers into the login page module
     renderLoginPage(root, handleLogin, handleRegister);
   } else if (session.role === "admin") {
-      renderAdminView(root, session);
-    } else {
-      renderStudentView(root, session);
-    }
+    renderAdminView(root, session);
+  } else {
+    renderStudentView(root, session);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", initApp);
