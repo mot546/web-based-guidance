@@ -1,0 +1,127 @@
+:root {
+    --student-primary: #2980b9; /* A strong, stable blue */
+    --student-dark: #1a202c;    /* Deep charcoal/navy */
+    --accent-gold: #f1c40f;
+    --sidebar-width: 260px;
+}
+
+.student-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    width: var(--sidebar-width);
+    background-color: var(--student-dark);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    position: fixed;
+    height: 100vh;
+}
+
+.sidebar h2 {
+    padding: 0 20px 20px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar nav {
+    margin-top: 20px;
+    flex-grow: 1;
+}
+
+.nav-item {
+    width: 100%;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: none;
+    border: none;
+    color: #bdc3c7;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: 0.3s;
+}
+
+.nav-item:hover, .nav-item.active {
+    background-color: #34495e;
+    color: white;
+}
+
+.nav-item.logout {
+    color: #e74c3c;
+    margin-bottom: 20px;
+}
+
+/* Content Area */
+.content-area {
+    margin-left: var(--sidebar-width);
+    flex-grow: 1;
+    padding: 40px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.status-badge {
+    background: #d1ecf1;
+    color: #0c5460;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+/* Dashboard Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.stat-card:hover { transform: translateY(-5px); }
+
+.stat-card i {
+    font-size: 2.5rem;
+    color: var(--student-primary);
+    margin-bottom: 10px;
+}
+
+.stat-card h3 { color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; margin: 5px 0; }
+.stat-card p { font-size: 1.8rem; font-weight: bold; color: var(--student-dark); margin: 0; }
+
+/* Appointment List */
+.list-container {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.empty-msg {
+    text-align: center;
+    color: #95a5a6;
+    padding: 40px 0;
+}
