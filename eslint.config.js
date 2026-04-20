@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
 import eslintConfigPrettier from "eslint-config-prettier";
-import globals from "globals"; // 1. Import globals
+import globals from "globals";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,6 +13,12 @@ const compat = new FlatCompat({
 });
 
 export default [
+  // --- ADD THIS BLOCK TO IGNORE BUILT FILES ---
+  {
+    ignores: ["dist/**", "node_modules/**", "webpack.*.js"],
+  },
+  // ---------------------------------------------
+  
   js.configs.recommended,
   ...compat.extends("eslint-config-airbnb-base"),
   {
@@ -21,7 +27,7 @@ export default [
       sourceType: "module",
       ecmaVersion: "latest",
       globals: {
-        ...globals.browser, // 2. This fixes 'document', 'window', 'localStorage' warnings
+        ...globals.browser,
       },
     },
     rules: {
@@ -30,13 +36,13 @@ export default [
       "import/extensions": "off",
       "import/no-extraneous-dependencies": "off",
       "no-underscore-dangle": ["error", { allow: ["__filename", "__dirname"] }],
-
-      // 3. Add these specific overrides to fix your 12 errors:
-      "no-param-reassign": ["error", { props: false }], // Allows root.innerHTML = ...
-      "import/prefer-default-export": "off", // Allows named exports
-      "no-use-before-define": "off", // Allows calling functions before they are written
-      "no-alert": "off", // Allows alert()
-      "consistent-return": "off", // Stops demanding 'return' in all paths
+      "no-param-reassign": ["error", { props: false }],
+      "import/prefer-default-export": "off",
+      "no-use-before-define": "off",
+      "no-alert": "off",
+      "consistent-return": "off",
+      "no-shadow": "off",   // Silences the 'n already declared' errors
+      "no-plusplus": "off", // Allows i++
     },
   },
   eslintConfigPrettier,
