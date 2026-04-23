@@ -1,92 +1,95 @@
-:root {
-  --admin-primary: #2c3e50;
-  --admin-accent: #3498db;
-  --status-pending: #f39c12;
-  --status-approved: #27ae60;
-  --status-rejected: #e74c3c;
-}
+/* src/styles/admin.css */
 
 .admin-container {
   display: flex;
   min-height: 100vh;
-  background-color: #f4f7f6;
+  /* Use the gradient logic from your landing page */
+  background: radial-gradient(circle at top right, #f1f5f9, #ffffff);
 }
 
-/* Sidebar */
-.admin-sidebar {
-  width: 260px;
-  background-color: var(--admin-primary);
-  color: white;
+.sidebar {
+  /* Use the variable from your root if you have it, otherwise set it here */
+  width: var(--sidebar-width, 280px);
   position: fixed;
   height: 100vh;
-  padding-top: 20px;
-}
-
-.admin-sidebar .brand {
-  padding: 0 20px 30px;
-  font-weight: bold;
-  font-size: 1.2rem;
+  left: 0;
+  top: 0;
+  background: white;
+  border-right: var(--glass-border);
+  z-index: 1000;
+  padding: 2rem 1.5rem;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--admin-accent);
+  flex-direction: column;
 }
 
-.nav-btn {
-  width: 100%;
-  padding: 15px 20px;
-  background: none;
-  border: none;
-  color: #ecf0f1;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  text-align: left;
-  transition: 0.2s;
-}
-
-.nav-btn:hover,
-.nav-btn.active {
-  background: #34495e;
-  border-left: 4px solid var(--admin-accent);
-}
-
-/* Main Content */
-.admin-main {
-  margin-left: 260px;
-  flex-grow: 1;
+.content-area {
+  /* This is the most important line for your layout */
+  margin-left: var(--sidebar-width, 280px); 
+  
+  flex: 1;
   padding: 40px;
+  box-sizing: border-box;
 }
 
-.admin-header {
+/* Styling the Admin Dashboard Header */
+.view-header {
+  margin-bottom: 2rem;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 30px;
+  align-items: center;
 }
 
-/* Table Card */
+.view-header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-dark);
+}
+
+/* Stats Grid: Making them sit side-by-side */
+.stats-grid {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap; /* Safety for smaller screens */
+}
+
+.stat-card {
+  flex: 1;
+  min-width: 250px;
+  background: var(--bg-card);
+  border: var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
 .table-card {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: var(--glass-border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden; /* Keeps the rounded corners on the table */
 }
 
-.table-header {
+.table-header-main {
   padding: 20px;
-  border-bottom: 1px solid #eee;
+  border-bottom: var(--glass-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.table-header input {
-  padding: 8px 15px;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  width: 250px;
+/* Ensure the table is responsive inside the card */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
 }
 
 table {
@@ -95,69 +98,15 @@ table {
 }
 
 th {
-  background: #f8f9fa;
-  padding: 15px;
+  background: #f8fafc;
+  padding: 12px 20px;
   text-align: left;
-  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
   text-transform: uppercase;
-  color: #7f8c8d;
-  letter-spacing: 1px;
 }
 
 td {
-  padding: 15px;
-  border-bottom: 1px solid #f1f1f1;
-  color: #34495e;
-  font-size: 0.95rem;
-}
-
-/* Status Badges */
-.badge {
-  padding: 5px 12px;
-  border-radius: 15px;
-  font-size: 0.75rem;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-.badge.pending {
-  background: #fff3cd;
-  color: #856404;
-}
-.badge.approved {
-  background: #d4edda;
-  color: #155724;
-}
-.badge.cancelled {
-  background: #f8d7da;
-  color: #721c24;
-}
-
-/* Action Buttons */
-.action-group {
-  display: flex;
-  gap: 8px;
-}
-
-.icon-btn {
-  border: none;
-  padding: 6px;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  transition: 0.2s;
-}
-
-.icon-btn.approve {
-  background: #e8f5e9;
-  color: #2e7d32;
-}
-.icon-btn.cancel {
-  background: #ffebee;
-  color: #c62828;
-}
-
-.icon-btn:hover {
-  filter: brightness(0.9);
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
 }

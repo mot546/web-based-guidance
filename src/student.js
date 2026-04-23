@@ -33,7 +33,7 @@ function renderBookingForm() {
         <p>Fill out the form below to schedule a session with the guidance office.</p>
         <hr>
         <form id="appointment-form">
-            <p><i>(Booking Form Logic will go here)</i></p>
+            <p><i>(coming soon)</i></p>
         </form>
     </div>
   `;
@@ -53,19 +53,29 @@ function renderHistory() {
 
 // --- MAIN RENDERER ---
 
-export function renderStudentView(root, session) {
+export function renderStudentView(root, session, onLogout) {
   root.innerHTML = `
     <div class="student-container">
-        <aside class="sidebar">
-            <h2><i class="material-icons">school</i> Granby Gateway</h2>
+        <button id="menu-toggle" class="menu-btn mobile-only">
+            <i class="material-icons">menu</i>
+        </button>
+
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="material-icons">school</i> Granby Gateway</h2>
+                <button id="close-sidebar" class="close-btn mobile-only">
+                    <i class="material-icons">close</i>
+                </button>
+            </div>
+            
             <nav id="student-nav">
-                <button class="nav-item active" data-target="dashboard" id="nav-dashboard">
+                <button class="nav-item active" data-target="dashboard">
                     <i class="material-icons">dashboard</i> Dashboard
                 </button>
-                <button class="nav-item" data-target="book" id="nav-book">
+                <button class="nav-item" data-target="book">
                     <i class="material-icons">event</i> Book Appointment
                 </button>
-                <button class="nav-item" data-target="records" id="nav-records">
+                <button class="nav-item" data-target="records">
                     <i class="material-icons">history</i> My History
                 </button>
                 <button class="nav-item logout" id="logoutBtn">
@@ -74,10 +84,14 @@ export function renderStudentView(root, session) {
             </nav>
         </aside>
 
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
         <main class="content-area">
             <header>
-                <h1>Welcome back, ${session.name}!</h1>
-                <span class="status-badge">Student Account</span>
+                <div class="header-text">
+                    <h1>Welcome back, ${session.name}!</h1>
+                    <span class="status-badge">Student Account</span>
+                </div>
             </header>
 
             <section id="dynamic-content">
@@ -87,25 +101,40 @@ export function renderStudentView(root, session) {
     </div>
   `;
 
-  setupStudentListeners();
+  // Pass the logout handler to the listener setup
+  setupStudentListeners(onLogout);
 }
-
 // --- EVENT LISTENERS ---
 
-function setupStudentListeners() {
+function setupStudentListeners(onLogout) {
   const content = document.getElementById("dynamic-content");
   const navButtons = document.querySelectorAll(".nav-item:not(.logout)");
+  
+  // Mobile elements
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("sidebar-overlay");
+  const menuToggle = document.getElementById("menu-toggle");
+  const closeSidebar = document.getElementById("close-sidebar");
 
-  // Handle Tab Switching
-  navButtons.forEach(btn => {
+  // --- 1. MOBILE MENU LOGIC ---
+  const toggleMenu = () => {
+    sidebar.classList.toggle("active");
+    overlay.classList.toggle("active");
+  };
+
+  if (menuToggle) menuToggle.onclick = toggleMenu;
+  if (closeSidebar) closeSidebar.onclick = toggleMenu;
+  if (overlay) overlay.onclick = toggleMenu;
+
+  // --- 2. TAB SWITCHING LOGIC ---
+  navButtons.forEach((btn) => {
     btn.onclick = () => {
-      // 1. Remove 'active' from all, add to clicked
-      navButtons.forEach(b => b.classList.remove("active"));
+      // Update active button state
+      navButtons.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
 
-      // 2. Switch Content based on data-target attribute
+      // Render the correct view
       const target = btn.getAttribute("data-target");
-      
       if (target === "dashboard") {
         content.innerHTML = renderDashboard();
       } else if (target === "book") {
@@ -113,12 +142,18 @@ function setupStudentListeners() {
       } else if (target === "records") {
         content.innerHTML = renderHistory();
       }
+
+      // AUTO-CLOSE: If on mobile, close the sidebar after clicking a link
+      if (window.innerWidth <= 768 && sidebar.classList.contains("active")) {
+        toggleMenu();
+      }
     };
   });
 
-  // Logout
-  document.getElementById("logoutBtn").onclick = () => {
-    localStorage.removeItem("gh_session");
-    window.location.reload();
-  };
+  // --- 3. LOGOUT LOGIC ---
+  // Use the handler passed from index.js for a clean redirect to landing
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.onclick = onLogout;
+  }
 }
