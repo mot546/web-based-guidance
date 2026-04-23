@@ -27,7 +27,7 @@ export function renderLoginPage(root, onLogin, onRegister) {
                 </div>
 
                 <div class="auth-footer">
-                    ${isRegistering ? "Already have an account?" : "New to GuidanceHub?"}
+                    ${isRegistering ? "Already have an account?" : "New to Granby Gateway?"}
                     <button id="toggleAuth" class="link-btn">
                         ${isRegistering ? "Sign In" : "Register Now"}
                     </button>
