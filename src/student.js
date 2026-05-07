@@ -1,65 +1,74 @@
 import "./styles/student.css";
 import emailjs from "@emailjs/browser";
-import { 
-    format, 
-    startOfMonth, 
-    endOfMonth, 
-    getDay, 
-    getDate, 
-    isSameMonth,
-    isSameDay
-} from 'date-fns';
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  getDay,
+  getDate,
+  isSameMonth,
+  isSameDay,
+} from "date-fns";
 
 emailjs.init("6_rFpZEVOh3AVEsIM");
 
 // --- VIEW COMPONENTS ---
 export function renderRightSidebar(myApps) {
-    const now = new Date();
-    
-    // 1. Get the single next approved appointment
-    const nextApp = myApps
-        .filter(a => a.status.toLowerCase() === 'approved' && new Date(a.date) >= now)
-        .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+  const now = new Date();
 
-    // 2. Build the Calendar HTML
-    const startDay = getDay(startOfMonth(now)); 
-    const totalDays = getDate(endOfMonth(now));
-    const padding = Array(startDay).fill('<div class="day-num muted"></div>');
-    const days = [];
+  // 1. Get the single next approved appointment
+  const nextApp = myApps
+    .filter(
+      (a) => a.status.toLowerCase() === "approved" && new Date(a.date) >= now,
+    )
+    .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
 
-    for (let d = 1; d <= totalDays; d++) {
-        const currentIterationDate = new Date(now.getFullYear(), now.getMonth(), d);
-        const isToday = isSameDay(currentIterationDate, now) ? 'today' : '';
-        const hasEvent = myApps.some(app => 
-            isSameDay(new Date(app.date), currentIterationDate) && 
-            app.status.toLowerCase() === 'approved'
-        ) ? 'has-event' : '';
-        
-        days.push(`<div class="day-num ${isToday} ${hasEvent}">${d}</div>`);
-    }
+  // 2. Build the Calendar HTML
+  const startDay = getDay(startOfMonth(now));
+  const totalDays = getDate(endOfMonth(now));
+  const padding = Array(startDay).fill('<div class="day-num muted"></div>');
+  const days = [];
 
-    // 3. Return the Sidebar HTML string
-    return `
+  for (let d = 1; d <= totalDays; d++) {
+    const currentIterationDate = new Date(now.getFullYear(), now.getMonth(), d);
+    const isToday = isSameDay(currentIterationDate, now) ? "today" : "";
+    const hasEvent = myApps.some(
+      (app) =>
+        isSameDay(new Date(app.date), currentIterationDate) &&
+        app.status.toLowerCase() === "approved",
+    )
+      ? "has-event"
+      : "";
+
+    days.push(`<div class="day-num ${isToday} ${hasEvent}">${d}</div>`);
+  }
+
+  // 3. Return the Sidebar HTML string
+  return `
         <aside class="right-sidebar">
             <div class="next-up-card">
                 <div class="card-tag">NEXT SESSION</div>
-                ${nextApp ? `
+                ${
+                  nextApp
+                    ? `
                     <div class="next-app-info">
-                        <h2>${format(new Date(nextApp.date), 'MMMM dd, yyyy')}</h2>
+                        <h2>${format(new Date(nextApp.date), "MMMM dd, yyyy")}</h2>
                         <p>${nextApp.time} | Guidance Office</p>
                     </div>
-                ` : `<p style="font-size:0.8rem; color:#94a3b8; margin-top:10px;">No upcoming sessions.</p>`}
+                `
+                    : `<p style="font-size:0.8rem; color:#94a3b8; margin-top:10px;">No upcoming sessions.</p>`
+                }
             </div>
 
             <div class="calendar-card">
                 <div class="calendar-header">
-                    <span style="font-weight:800;">${format(now, 'MMMM yyyy')}</span>
+                    <span style="font-weight:800;">${format(now, "MMMM yyyy")}</span>
                 </div>
                 <div class="calendar-grid">
                     <div class="day-name">S</div><div class="day-name">M</div><div class="day-name">T</div>
                     <div class="day-name">W</div><div class="day-name">T</div><div class="day-name">F</div>
                     <div class="day-name">S</div>
-                    ${padding.join('')}${days.join('')}
+                    ${padding.join("")}${days.join("")}
                 </div>
             </div>
 
@@ -71,22 +80,23 @@ export function renderRightSidebar(myApps) {
     `;
 }
 export function renderDashboard(session = {}) {
-    // 1. Data Retrieval & Filtering
-    const appointments = JSON.parse(localStorage.getItem("gh_appointments")) || [];
-    const myApps = appointments.filter(a => 
-        a.studentId === session.id || a.studentEmail === session.email
-    );
+  // 1. Data Retrieval & Filtering
+  const appointments =
+    JSON.parse(localStorage.getItem("gh_appointments")) || [];
+  const myApps = appointments.filter(
+    (a) => a.studentId === session.id || a.studentEmail === session.email,
+  );
 
-    const pendingCount = myApps.filter(a => a.status === 'pending').length;
-    const approvedCount = myApps.filter(a => a.status === 'approved').length;
+  const pendingCount = myApps.filter((a) => a.status === "pending").length;
+  const approvedCount = myApps.filter((a) => a.status === "approved").length;
 
-    // 2. Return the combined view
-    return `
+  // 2. Return the combined view
+  return `
         <div class="dashboard-wrapper">
             <div class="dashboard-main-col">
                 <div class="dashboard-hero" style="padding-top: 40px;"> 
                     <span class="badge">Student Portal</span>
-                    <h1>Welcome Back, ${session.name || 'Student'}!</h1>
+                    <h1>Welcome Back, ${session.name || "Student"}!</h1>
                     <p>You have <strong>${pendingCount}</strong> pending requests.</p>
                 </div>
 
@@ -116,13 +126,21 @@ export function renderDashboard(session = {}) {
                                 <tr><th>Date</th><th>Type</th><th>Status</th></tr>
                             </thead>
                             <tbody>
-                                ${myApps.slice(0, 5).map(app => `
+                                ${
+                                  myApps
+                                    .slice(0, 5)
+                                    .map(
+                                      (app) => `
                                     <tr>
-                                        <td><strong>${format(new Date(app.date), 'MMMM dd, yyyy')}</strong></td>
+                                        <td><strong>${format(new Date(app.date), "MMMM dd, yyyy")}</strong></td>
                                         <td>${app.type}</td>
                                         <td><span class="status-pill ${app.status.toLowerCase()}">${app.status}</span></td>
                                     </tr>
-                                `).join('') || '<tr><td colspan="3" style="text-align:center; padding:20px;">No appointments yet.</td></tr>'}
+                                `,
+                                    )
+                                    .join("") ||
+                                  '<tr><td colspan="3" style="text-align:center; padding:20px;">No appointments yet.</td></tr>'
+                                }
                             </tbody>
                         </table>
                     </div>
@@ -135,8 +153,9 @@ export function renderDashboard(session = {}) {
 }
 export function renderBookingForm(session = {}) {
   // 1. Get data for the sidebar
-  const allAppointments = JSON.parse(localStorage.getItem("gh_appointments")) || [];
-  const myApps = allAppointments.filter(a => a.studentId === session.id);
+  const allAppointments =
+    JSON.parse(localStorage.getItem("gh_appointments")) || [];
+  const myApps = allAppointments.filter((a) => a.studentId === session.id);
 
   return `
     <div class="dashboard-wrapper">
@@ -193,14 +212,14 @@ export function renderBookingForm(session = {}) {
   `;
 }
 export function renderHistory(session = {}) {
-    // 1. Data Retrieval
-    const allApps = JSON.parse(localStorage.getItem("gh_appointments")) || [];
-    const myApps = allApps.filter((app) => app.studentEmail === session.email);
+  // 1. Data Retrieval
+  const allApps = JSON.parse(localStorage.getItem("gh_appointments")) || [];
+  const myApps = allApps.filter((app) => app.studentEmail === session.email);
 
-    // 2. Sort by ID (assuming higher ID = newer)
-    const sortedApps = [...myApps].sort((a, b) => b.id - a.id);
+  // 2. Sort by ID (assuming higher ID = newer)
+  const sortedApps = [...myApps].sort((a, b) => b.id - a.id);
 
-    return `
+  return `
         <div class="dashboard-wrapper">
             <div class="dashboard-main-col">
                 <div class="dashboard-hero" style="padding-top: 40px;"> 
@@ -211,7 +230,11 @@ export function renderHistory(session = {}) {
 
                 <div class="table-card history-container">
                     <div class="history-list">
-                        ${sortedApps.length > 0 ? sortedApps.map(app => `
+                        ${
+                          sortedApps.length > 0
+                            ? sortedApps
+                                .map(
+                                  (app) => `
                             <div class="history-item ${app.status.toLowerCase()}">
                                 <div class="history-main">
                                     <div class="history-icon">
@@ -219,19 +242,23 @@ export function renderHistory(session = {}) {
                                     </div>
                                     <div class="history-info">
                                         <span class="app-type">${app.type}</span>
-                                        <span class="app-date">${format(new Date(app.date), 'MMMM dd, yyyy')} • ${app.time}</span>
+                                        <span class="app-date">${format(new Date(app.date), "MMMM dd, yyyy")} • ${app.time}</span>
                                     </div>
                                 </div>
                                 <div class="history-status">
                                     <span class="status-badge">${app.status.toUpperCase()}</span>
                                 </div>
                             </div>
-                        `).join("") : `
+                        `,
+                                )
+                                .join("")
+                            : `
                             <div class="empty-history">
                                 <i class="material-icons">event_busy</i>
                                 <p>You haven't made any appointments yet.</p>
                             </div>
-                        `}
+                        `
+                        }
                     </div>
                 </div>
             </div>
@@ -241,12 +268,16 @@ export function renderHistory(session = {}) {
     `;
 }
 function getStatusIcon(status) {
-    switch (status.toLowerCase()) {
-        case 'approved': return 'check_circle';
-        case 'pending': return 'schedule';
-        case 'rejected': return 'cancel';
-        default: return 'event';
-    }
+  switch (status.toLowerCase()) {
+    case "approved":
+      return "check_circle";
+    case "pending":
+      return "schedule";
+    case "rejected":
+      return "cancel";
+    default:
+      return "event";
+  }
 }
 // --- LOGIC FUNCTIONS ---
 
@@ -334,14 +365,6 @@ export function renderStudentView(root, session, onLogout) {
             </nav>
         </aside>
         <main class="content-area">
-            <header>
-                <div class="header-content">
-                    
-                    <div class="header-text">
-                        <h1>Welcome, ${session.name}!</h1>
-                    </div>
-                </div>
-            </header>
             <section id="dynamic-content">${renderDashboard(session)}</section>
         </main>
     </div>
@@ -384,7 +407,7 @@ function setupStudentListeners(onLogout, session) {
       }
 
       const target = btn.getAttribute("data-target");
-      
+
       // FIX: Pass 'session' into these function calls
       if (target === "dashboard") {
         content.innerHTML = renderDashboard(session);
@@ -399,6 +422,6 @@ function setupStudentListeners(onLogout, session) {
 
   const logoutBtn = document.getElementById("logoutBtn");
   if (logoutBtn) {
-      logoutBtn.onclick = onLogout;
+    logoutBtn.onclick = onLogout;
   }
 }

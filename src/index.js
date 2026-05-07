@@ -76,7 +76,7 @@ function handleRegister(name, u, p, email, showError, showSuccess) {
     email,
     role: "student",
   };
-  
+
   users.push(newUser);
   localStorage.setItem("gh_users", JSON.stringify(users));
 
