@@ -1,17 +1,19 @@
 import "./styles/student.css";
-import emailjs from '@emailjs/browser';
+import emailjs from "@emailjs/browser";
+
 emailjs.init("6_rFpZEVOh3AVEsIM");
 
 // --- VIEW COMPONENTS ---
 
 function renderDashboard() {
   // Logic to fetch counts from localStorage
-  const allAppointments = JSON.parse(localStorage.getItem("gh_appointments")) || [];
+  const allAppointments =
+    JSON.parse(localStorage.getItem("gh_appointments")) || [];
   const session = JSON.parse(localStorage.getItem("gh_session"));
-  const myApps = allAppointments.filter(app => app.studentId === session.id);
-  
-  const pending = myApps.filter(a => a.status === "pending").length;
-  const approved = myApps.filter(a => a.status === "approved").length;
+  const myApps = allAppointments.filter((app) => app.studentId === session.id);
+
+  const pending = myApps.filter((a) => a.status === "pending").length;
+  const approved = myApps.filter((a) => a.status === "approved").length;
 
   return `
     <div class="stats-grid">
@@ -29,7 +31,11 @@ function renderDashboard() {
     <div class="upcoming-appointments">
         <h3>Your Appointments</h3>
         <div id="appointment-list" class="list-container">
-            ${myApps.length > 0 ? myApps.map(app => `
+            ${
+              myApps.length > 0
+                ? myApps
+                    .map(
+                      (app) => `
                 <div class="appointment-item card">
                     <div class="app-info">
                         <strong>${app.type}</strong>
@@ -37,7 +43,11 @@ function renderDashboard() {
                     </div>
                     <span class="status-pill ${app.status}">${app.status}</span>
                 </div>
-            `).join('') : '<p class="empty-msg">No appointments found. Use the sidebar to book one!</p>'}
+            `,
+                    )
+                    .join("")
+                : '<p class="empty-msg">No appointments found. Use the sidebar to book one!</p>'
+            }
         </div>
     </div>
   `;
@@ -62,7 +72,7 @@ function renderBookingForm() {
             </div>
             <div class="form-group">
                 <label>Date</label>
-                <input type="date" id="appDate" required min="${new Date().toISOString().split('T')[0]}">
+                <input type="date" id="appDate" required min="${new Date().toISOString().split("T")[0]}">
             </div>
             <div class="form-group">
                 <label>Time</label>
@@ -78,24 +88,28 @@ function renderBookingForm() {
   `;
 }
 function renderHistory() {
-    // 1. Get the current logged-in user session
-    const session = JSON.parse(localStorage.getItem("gh_session"));
-    
-    // 2. Get all appointments and filter for this specific student
-    const allApps = JSON.parse(localStorage.getItem("gh_appointments")) || [];
-    const myApps = allApps.filter(app => app.studentEmail === session.email);
+  // 1. Get the current logged-in user session
+  const session = JSON.parse(localStorage.getItem("gh_session"));
 
-    // 3. Sort so the most recent is at the top
-    const sortedApps = [...myApps].sort((a, b) => b.id - a.id);
+  // 2. Get all appointments and filter for this specific student
+  const allApps = JSON.parse(localStorage.getItem("gh_appointments")) || [];
+  const myApps = allApps.filter((app) => app.studentEmail === session.email);
 
-    return `
+  // 3. Sort so the most recent is at the top
+  const sortedApps = [...myApps].sort((a, b) => b.id - a.id);
+
+  return `
         <div class="student-card">
             <div class="card-header">
                 <h2><i class="material-icons">history</i> My Appointment History</h2>
                 <p>Track the status of your guidance requests below.</p>
             </div>
             <div class="history-list">
-                ${sortedApps.length > 0 ? sortedApps.map(app => `
+                ${
+                  sortedApps.length > 0
+                    ? sortedApps
+                        .map(
+                          (app) => `
                     <div class="history-item ${app.status}">
                         <div class="history-main">
                             <div class="history-icon">
@@ -110,12 +124,16 @@ function renderHistory() {
                             <span class="status-badge">${app.status.toUpperCase()}</span>
                         </div>
                     </div>
-                `).join('') : `
+                `,
+                        )
+                        .join("")
+                    : `
                     <div class="empty-history">
                         <i class="material-icons">event_busy</i>
                         <p>You haven't made any appointments yet.</p>
                     </div>
-                `}
+                `
+                }
             </div>
         </div>
     `;
@@ -123,9 +141,9 @@ function renderHistory() {
 
 // Helper to change the icon based on status
 function getStatusIcon(status) {
-    if (status === 'approved') return 'check_circle';
-    if (status === 'rejected') return 'cancel';
-    return 'pending';
+  if (status === "approved") return "check_circle";
+  if (status === "rejected") return "cancel";
+  return "pending";
 }
 
 // --- LOGIC FUNCTIONS ---
@@ -148,7 +166,7 @@ function attachBookingListener(session) {
       date: document.getElementById("appDate").value,
       time: document.getElementById("appTime").value,
       notes: document.getElementById("appNotes").value,
-      status: "pending"
+      status: "pending",
     };
 
     submitBtn.innerText = "Sending...";
@@ -160,30 +178,32 @@ function attachBookingListener(session) {
     localStorage.setItem("gh_appointments", JSON.stringify(allApps));
 
     // 2. Send via EmailJS (Optional/Integration)
-    const adminEmail = localStorage.getItem("admin_notification_email") || "admin@granby.edu";
-    
-    emailjs.send(
-    'service_mtv9cbi', 
-    'template_mublumh', 
-    {
+    const adminEmail =
+      localStorage.getItem("admin_notification_email") || "admin@granby.edu";
+
+    emailjs
+      .send("service_mtv9cbi", "template_mublumh", {
         to_email: adminEmail, // Ensure this is a real email in your localStorage settings!
         from_name: session.name,
-        from_email: session.email, 
+        from_email: session.email,
         app_type: newApp.type,
         app_date: newApp.date,
         app_time: newApp.time,
-        message: newApp.notes
-    }
-    ).then((res) => {
+        message: newApp.notes,
+      })
+      .then((res) => {
         console.log("Email Sent Successfully!", res.status, res.text);
         alert("Success! Appointment booked and Admin notified.");
         window.location.reload();
-    }).catch((err) => {
+      })
+      .catch((err) => {
         // This alert will now tell you EXACTLY what EmailJS is complaining about
         console.error("EmailJS Detailed Error:", err);
-        alert(`Email Error: ${err.text} (Code: ${err.status}). Booking still saved locally.`);
+        alert(
+          `Email Error: ${err.text} (Code: ${err.status}). Booking still saved locally.`,
+        );
         window.location.reload();
-    });
+      });
   };
 }
 
@@ -213,9 +233,14 @@ export function renderStudentView(root, session, onLogout) {
         </aside>
         <main class="content-area">
             <header>
-                <div class="header-text">
-                    <h1>Welcome, ${session.name}!</h1>
-                </div>
+                    <div class="header-content">
+              <button id="mobileMenuBtn" class="mobile-only-btn">
+                  <i class="material-icons">menu</i>
+              </button>
+              <div class="header-text">
+                  <h1>Welcome, ${session.name}!</h1>
+              </div>
+          </div>
             </header>
             <section id="dynamic-content">${renderDashboard()}</section>
         </main>
@@ -228,18 +253,45 @@ export function renderStudentView(root, session, onLogout) {
 function setupStudentListeners(onLogout, session) {
   const content = document.getElementById("dynamic-content");
   const navButtons = document.querySelectorAll(".nav-item:not(.logout)");
+  const sidebar = document.getElementById("sidebar");
+  const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+
+  // --- NEW: Toggle Logic ---
+  if (mobileMenuBtn && sidebar) {
+    mobileMenuBtn.onclick = (e) => {
+      e.stopPropagation(); // Prevents click from bubbling
+      sidebar.classList.toggle("active");
+    };
+  }
+
+  // Close sidebar when clicking outside on mobile
+  document.addEventListener("click", (e) => {
+    if (
+      window.innerWidth <= 768 &&
+      sidebar.classList.contains("active") &&
+      !sidebar.contains(e.target) &&
+      e.target !== mobileMenuBtn
+    ) {
+      sidebar.classList.remove("active");
+    }
+  });
 
   navButtons.forEach((btn) => {
     btn.onclick = () => {
       navButtons.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
 
+      // Auto-close sidebar on mobile after selecting an item
+      if (window.innerWidth <= 768) {
+        sidebar.classList.remove("active");
+      }
+
       const target = btn.getAttribute("data-target");
       if (target === "dashboard") {
         content.innerHTML = renderDashboard();
       } else if (target === "book") {
         content.innerHTML = renderBookingForm();
-        attachBookingListener(session); // Start listening for the form submit
+        attachBookingListener(session);
       } else if (target === "records") {
         content.innerHTML = renderHistory();
       }

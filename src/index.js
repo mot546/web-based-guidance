@@ -8,8 +8,22 @@ const seedUsers = () => {
   const existingUsers = localStorage.getItem("gh_users");
   if (!existingUsers) {
     const initialUsers = [
-      { id: 1, user: "student", pass: "123", role: "student", name: "Alice", email: "alice@granby.edu" },
-      { id: 2, user: "admin", pass: "123", role: "admin", name: "Mr. Bossbeza", email: "jellopancake213@gmail.com" },
+      {
+        id: 1,
+        user: "student",
+        pass: "123",
+        role: "student",
+        name: "Alice",
+        email: "alice@granby.edu",
+      },
+      {
+        id: 2,
+        user: "admin",
+        pass: "123",
+        role: "admin",
+        name: "Mr. Bossbeza",
+        email: "jellopancake213@gmail.com",
+      },
     ];
     localStorage.setItem("gh_users", JSON.stringify(initialUsers));
   }
@@ -26,17 +40,20 @@ function handleLogout() {
 
 function handleLogin(identifier, p, showError) {
   const users = JSON.parse(localStorage.getItem("gh_users")) || [];
-  const found = users.find((u) => 
-    (u.user === identifier || u.email === identifier) && u.pass === p
+  const found = users.find(
+    (u) => (u.user === identifier || u.email === identifier) && u.pass === p,
   );
 
   if (found) {
-    localStorage.setItem("gh_session", JSON.stringify({
+    localStorage.setItem(
+      "gh_session",
+      JSON.stringify({
         id: found.id,
         name: found.name,
         role: found.role,
-        email: found.email
-    }));
+        email: found.email,
+      }),
+    );
     initApp();
   } else {
     showError("Invalid username/email or password.");
@@ -45,13 +62,20 @@ function handleLogin(identifier, p, showError) {
 
 function handleRegister(name, u, p, email, showError) {
   const users = JSON.parse(localStorage.getItem("gh_users")) || [];
-  const exists = users.some(user => user.user === u || user.email === email);
+  const exists = users.some((user) => user.user === u || user.email === email);
 
   if (exists) {
     return showError("Username or Email already exists!");
   }
 
-  const newUser = { id: Date.now(), name, user: u, pass: p, email, role: "student" };
+  const newUser = {
+    id: Date.now(),
+    name,
+    user: u,
+    pass: p,
+    email,
+    role: "student",
+  };
   users.push(newUser);
   localStorage.setItem("gh_users", JSON.stringify(users));
 
@@ -71,14 +95,11 @@ function initApp() {
       sessionStorage.setItem("gh_entered", "true");
       initApp();
     });
-  } 
-  else if (!session) {
+  } else if (!session) {
     renderLoginPage(root, handleLogin, handleRegister);
-  } 
-  else if (session.role === "admin") {
+  } else if (session.role === "admin") {
     renderAdminView(root, session, handleLogout);
-  } 
-  else {
+  } else {
     renderStudentView(root, session, handleLogout);
   }
 }

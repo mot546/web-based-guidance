@@ -159,3 +159,90 @@ body {
     padding: 1.5rem;
   }
 }
+
+/* Mobile Responsive Adjustments */
+@media screen and (max-width: 768px) {
+  /* Container padding */
+  #dynamic-content {
+    padding: 10px;
+    padding-bottom: 80px; /* Space for bottom nav if used */
+  }
+
+  /* Transform Tables into Cards */
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr {
+    display: block;
+  }
+
+  thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  tr {
+    background: white;
+    margin-bottom: 15px;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eef2f6;
+  }
+
+  td {
+    border: none;
+    position: relative;
+    padding-left: 50% !important;
+    text-align: right !important;
+    margin-bottom: 8px;
+  }
+
+  td:before {
+    position: absolute;
+    left: 10px;
+    width: 45%;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: bold;
+    color: #64748b;
+    content: attr(data-label); /* We'll add this in JS */
+  }
+
+  /* Beautiful Nav Buttons */
+  .mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+
+  .nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 0.7rem;
+    transition: 0.3s;
+  }
+
+  .nav-btn.active {
+    color: #3b82f6;
+  }
+
+  .nav-btn i {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+  }
+}

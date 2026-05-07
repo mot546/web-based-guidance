@@ -3,102 +3,113 @@ import "./styles/admin.css";
 // --- VIEW COMPONENTS ---
 
 function renderAppointmentsTable() {
-    // 1. Get raw data from localStorage
-    const rawAppointments = JSON.parse(localStorage.getItem("gh_appointments")) || [];
+  // 1. Get raw data from localStorage
+  const rawAppointments =
+    JSON.parse(localStorage.getItem("gh_appointments")) || [];
 
-    // 2. Sort: Newest ID (highest timestamp) first
-    // We spread into a new array [...] to avoid mutating the original data if needed elsewhere
-    const appointments = [...rawAppointments].sort((a, b) => b.id - a.id);
+  // 2. Sort: Newest first
+  const appointments = [...rawAppointments].sort((a, b) => b.id - a.id);
 
-    return `
-        <div class="admin-card">
-            <div class="card-header">
-                <h2><i class="material-icons">event_note</i> Appointment Requests</h2>
-                <div class="table-tools">
-                    <input type="text" id="tableSearch" placeholder="Search student name...">
-                </div>
-            </div>
-            <div class="table-container">
-                <table id="adminTable">
-                    <thead>
-                        <tr>
-                            <th>Student</th>
-                            <th>Type</th>
-                            <th>Date & Time</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${appointments.length > 0 ? appointments.map(app => `
-                            <tr>
-                                <td>
-                                    <div class="user-info">
-                                        <span class="user-name">${app.studentName}</span>
-                                        <span class="user-email">${app.studentEmail || 'no-email'}</span>
-                                    </div>
-                                </td>
-                                <td><span class="type-tag">${app.type}</span></td>
-                                <td>
-                                    <div class="date-info">
-                                        <div>${app.date}</div>
-                                        <small>${app.time}</small>
-                                    </div>
-                                </td>
-                                <td><span class="status-pill ${app.status}">${app.status}</span></td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="btn-approve" onclick="updateAppStatus(${app.id}, 'approved')" title="Approve">
-                                            <i class="material-icons">check</i>
-                                        </button>
-                                        <button class="btn-reject" onclick="updateAppStatus(${app.id}, 'rejected')" title="Reject">
-                                            <i class="material-icons">close</i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `).join('') : '<tr><td colspan="5" class="empty-row">No appointment requests found.</td></tr>'}
-                    </tbody>
-                </table>
+  return `
+    <div class="table-card">
+        <div class="table-header-main">
+            <h2><i class="material-icons">event_note</i> Appointment Requests</h2>
+            <div class="table-tools">
+                <input type="text" id="tableSearch" placeholder="Search student name...">
             </div>
         </div>
-    `;
-}
-/* Inside src/admin.js */
+        <div class="table-responsive">
+            <table id="adminTable">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Type</th>
+                        <th>Date & Time</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${
+                      appointments.length > 0
+                        ? appointments
+                            .map(
+                              (app) => `
+                        <tr>
+                            <td data-label="Student">
+                                <div class="user-info">
+                                    <span class="user-name">${app.studentName}</span>
+                                    <span class="user-email">${app.studentEmail || "no-email"}</span>
+                                </div>
+                            </td>
+                            <td data-label="Category">
+                                <span class="type-tag">${app.type}</span>
+                            </td>
+                            <td data-label="Schedule">
+                                <div class="date-info">
+                                    <div>${app.date}</div>
+                                    <small>${app.time}</small>
+                                </div>
+                            </td>
+                            <td data-label="Status">
+                                <span class="status-pill ${app.status}">${app.status}</span>
+                            </td>
+                            <td data-label="Actions">
+                                <div class="action-btns">
+                                    <button class="btn-approve" onclick="updateAppStatus(${app.id}, 'approved')" title="Approve">
+                                        <i class="material-icons">check</i>
+                                    </button>
+                                    <button class="btn-reject" onclick="updateAppStatus(${app.id}, 'rejected')" title="Reject">
+                                        <i class="material-icons">close</i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `,
+                            )
+                            .join("")
+                        : '<tr><td colspan="5" class="empty-row">No appointment requests found.</td></tr>'
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+  `;
+} /* Inside src/admin.js */
 
 window.updateAppStatus = (id, newStatus) => {
-    // 1. Get the latest data
-    let appointments = JSON.parse(localStorage.getItem("gh_appointments")) || [];
-    
-    // 2. Update the specific appointment
-    appointments = appointments.map(app => {
-        if (app.id === id) return { ...app, status: newStatus };
-        return app;
-    });
+  // 1. Get the latest data
+  let appointments = JSON.parse(localStorage.getItem("gh_appointments")) || [];
 
-    // 3. Save back to localStorage
-    localStorage.setItem("gh_appointments", JSON.stringify(appointments));
-    
-    // 4. FIX: Safely find the content area
-    const content = document.getElementById("dynamic-content");
-    
-    if (content) {
-        // Re-render the specific view (Appointments Table)
-        content.innerHTML = renderAppointmentsTable();
-    } else {
-        // Fallback: If the element is missing, refresh the whole page 
-        // to ensure data sync (useful for edge cases)
-        window.location.reload();
-    }
+  // 2. Update the specific appointment
+  appointments = appointments.map((app) => {
+    if (app.id === id) return { ...app, status: newStatus };
+    return app;
+  });
+
+  // 3. Save back to localStorage
+  localStorage.setItem("gh_appointments", JSON.stringify(appointments));
+
+  // 4. FIX: Safely find the content area
+  const content = document.getElementById("dynamic-content");
+
+  if (content) {
+    // Re-render the specific view (Appointments Table)
+    content.innerHTML = renderAppointmentsTable();
+  } else {
+    // Fallback: If the element is missing, refresh the whole page
+    // to ensure data sync (useful for edge cases)
+    window.location.reload();
+  }
 };
 /* Inside src/admin.js */
 
 function renderStudentRecords() {
-    // 1. Get all users and filter for students
-    const allUsers = JSON.parse(localStorage.getItem("gh_users")) || [];
-    const students = allUsers.filter(user => user.role === "student");
+  // 1. Get all users and filter for students
+  const allUsers = JSON.parse(localStorage.getItem("gh_users")) || [];
+  const students = allUsers.filter((user) => user.role === "student");
 
-    return `
+  return `
         <div class="admin-card">
             <div class="card-header">
                 <h2><i class="material-icons">people</i> Student Directory</h2>
@@ -117,14 +128,22 @@ function renderStudentRecords() {
                         </tr>
                     </thead>
                     <tbody>
-                        ${students.length > 0 ? students.map(std => `
+                        ${
+                          students.length > 0
+                            ? students
+                                .map(
+                                  (std) => `
                             <tr>
                                 <td class="user-name">${std.name}</td>
                                 <td>${std.email}</td>
                                 <td><code class="id-badge">${std.id}</code></td>
-                                <td>${std.joinedDate || 'N/A'}</td>
+                                <td>${std.joinedDate || "N/A"}</td>
                             </tr>
-                        `).join('') : '<tr><td colspan="4" class="empty-row">No registered students found.</td></tr>'}
+                        `,
+                                )
+                                .join("")
+                            : '<tr><td colspan="4" class="empty-row">No registered students found.</td></tr>'
+                        }
                     </tbody>
                 </table>
             </div>
@@ -133,12 +152,13 @@ function renderStudentRecords() {
 }
 
 function renderReports() {
-    const stats = getAnalytics();
-    
-    // Calculate percentages for the progress bars
-    const getWidth = (count) => stats.totalApps > 0 ? (count / stats.totalApps) * 100 : 0;
+  const stats = getAnalytics();
 
-    return `
+  // Calculate percentages for the progress bars
+  const getWidth = (count) =>
+    stats.totalApps > 0 ? (count / stats.totalApps) * 100 : 0;
+
+  return `
         <div class="admin-card">
             <div class="card-header">
                 <h2><i class="material-icons">analytics</i> System Analytics</h2>
@@ -184,10 +204,11 @@ function renderReports() {
 }
 
 export function renderAdminSettings() {
-    // Retrieve currently saved email or use a default
-    const savedEmail = localStorage.getItem("admin_notification_email") || "admin@granby.edu";
+  // Retrieve currently saved email or use a default
+  const savedEmail =
+    localStorage.getItem("admin_notification_email") || "admin@granby.edu";
 
-    return `
+  return `
         <div class="glass-card settings-card">
             <div class="card-header">
                 <h2><i class="material-icons">settings</i> System Settings</h2>
@@ -209,59 +230,59 @@ export function renderAdminSettings() {
     `;
 }
 function setupTableSearch() {
-    const searchInput = document.getElementById("tableSearch");
-    const table = document.getElementById("adminTable");
-    
-    // Debugging: Check if elements exist when function runs
-    if (!searchInput || !table) {
-        console.error("Search elements not found in DOM");
-        return;
-    }
+  const searchInput = document.getElementById("tableSearch");
+  const table = document.getElementById("adminTable");
 
-    console.log("Search listener attached successfully");
+  // Debugging: Check if elements exist when function runs
+  if (!searchInput || !table) {
+    console.error("Search elements not found in DOM");
+    return;
+  }
 
-    searchInput.addEventListener("input", () => {
-        const filter = searchInput.value.toLowerCase().trim();
-        const tbody = table.querySelector("tbody");
-        const rows = tbody.querySelectorAll("tr");
+  console.log("Search listener attached successfully");
 
-        rows.forEach(row => {
-            // This captures everything in the row (Name, Email, and Type)
-            const rowText = row.textContent.toLowerCase();
-            
-            if (rowText.includes(filter)) {
-                row.style.display = ""; // Show
-            } else {
-                row.style.display = "none"; // Hide
-            }
-        });
+  searchInput.addEventListener("input", () => {
+    const filter = searchInput.value.toLowerCase().trim();
+    const tbody = table.querySelector("tbody");
+    const rows = tbody.querySelectorAll("tr");
+
+    rows.forEach((row) => {
+      // This captures everything in the row (Name, Email, and Type)
+      const rowText = row.textContent.toLowerCase();
+
+      if (rowText.includes(filter)) {
+        row.style.display = ""; // Show
+      } else {
+        row.style.display = "none"; // Hide
+      }
     });
+  });
 }
 function setupStudentSearch() {
-    const searchInput = document.getElementById("studentSearch");
-    const table = document.getElementById("studentTable");
-    
-    // Safety check: if the elements aren't there yet, stop
-    if (!searchInput || !table) {
-        console.error("Student search input or table not found!");
-        return;
-    }
+  const searchInput = document.getElementById("studentSearch");
+  const table = document.getElementById("studentTable");
 
-    searchInput.addEventListener("input", () => {
-        const filter = searchInput.value.toLowerCase().trim();
-        const rows = table.querySelectorAll("tbody tr");
+  // Safety check: if the elements aren't there yet, stop
+  if (!searchInput || !table) {
+    console.error("Student search input or table not found!");
+    return;
+  }
 
-        rows.forEach(row => {
-            // This gets all the text in the row (Name, Email, ID)
-            const textValue = row.textContent.toLowerCase();
-            
-            if (textValue.includes(filter)) {
-                row.style.display = ""; // Show
-            } else {
-                row.style.display = "none"; // Hide
-            }
-        });
+  searchInput.addEventListener("input", () => {
+    const filter = searchInput.value.toLowerCase().trim();
+    const rows = table.querySelectorAll("tbody tr");
+
+    rows.forEach((row) => {
+      // This gets all the text in the row (Name, Email, ID)
+      const textValue = row.textContent.toLowerCase();
+
+      if (textValue.includes(filter)) {
+        row.style.display = ""; // Show
+      } else {
+        row.style.display = "none"; // Hide
+      }
     });
+  });
 }
 
 // --- MAIN RENDERER ---
@@ -355,24 +376,23 @@ function setupAdminListeners(onLogout) {
       btn.classList.add("active");
 
       const target = btn.getAttribute("data-target");
-      
+
       if (target === "appointments") {
         content.innerHTML = renderAppointmentsTable();
         setTimeout(() => {
-        setupTableSearch();
-    }, 0);
+          setupTableSearch();
+        }, 0);
       } else if (target === "students") {
         content.innerHTML = renderStudentRecords();
         setTimeout(() => {
-        setupStudentSearch();
-    }, 0);
+          setupStudentSearch();
+        }, 0);
       } else if (target === "reports") {
         content.innerHTML = renderReports();
-        
-      }else if (target === "settings") {
-            content.innerHTML = renderAdminSettings();
-            attachSettingsListener(); 
-        }
+      } else if (target === "settings") {
+        content.innerHTML = renderAdminSettings();
+        attachSettingsListener();
+      }
 
       // Auto-close on mobile
       if (window.innerWidth <= 768 && sidebar.classList.contains("active")) {
@@ -385,24 +405,23 @@ function setupAdminListeners(onLogout) {
     if (!form) return;
 
     form.onsubmit = (e) => {
-        e.preventDefault();
-        const email = document.getElementById("adminEmail").value;
-        
-        // Save to localStorage
-        localStorage.setItem("admin_notification_email", email);
-        
-        // Visual feedback
-        const btn = form.querySelector("button");
-        btn.innerText = "Settings Saved!";
-        btn.style.background = "#10b981"; // Success green
+      e.preventDefault();
+      const email = document.getElementById("adminEmail").value;
 
-        setTimeout(() => {
-            btn.innerText = "Save Configurations";
-            btn.style.background = ""; // Revert to primary
-        }, 2000);
+      // Save to localStorage
+      localStorage.setItem("admin_notification_email", email);
+
+      // Visual feedback
+      const btn = form.querySelector("button");
+      btn.innerText = "Settings Saved!";
+      btn.style.background = "#10b981"; // Success green
+
+      setTimeout(() => {
+        btn.innerText = "Save Configurations";
+        btn.style.background = ""; // Revert to primary
+      }, 2000);
     };
-}
-
+  }
 
   // Centralized Logout
   document.getElementById("adminLogoutBtn").onclick = onLogout;
@@ -412,18 +431,18 @@ function setupAdminListeners(onLogout) {
 }
 
 function getAnalytics() {
-    const apps = JSON.parse(localStorage.getItem("gh_appointments")) || [];
-    const users = JSON.parse(localStorage.getItem("gh_users")) || [];
-    
-    return {
-        totalApps: apps.length,
-        approved: apps.filter(a => a.status === 'approved').length,
-        pending: apps.filter(a => a.status === 'pending').length,
-        rejected: apps.filter(a => a.status === 'rejected').length,
-        totalStudents: users.filter(u => u.role === 'student').length,
-        // Breakdown by type
-        academic: apps.filter(a => a.type === 'Academic Guidance').length,
-        personal: apps.filter(a => a.type === 'Personal Concern').length,
-        career: apps.filter(a => a.type === 'Career Consultation').length
-    };
+  const apps = JSON.parse(localStorage.getItem("gh_appointments")) || [];
+  const users = JSON.parse(localStorage.getItem("gh_users")) || [];
+
+  return {
+    totalApps: apps.length,
+    approved: apps.filter((a) => a.status === "approved").length,
+    pending: apps.filter((a) => a.status === "pending").length,
+    rejected: apps.filter((a) => a.status === "rejected").length,
+    totalStudents: users.filter((u) => u.role === "student").length,
+    // Breakdown by type
+    academic: apps.filter((a) => a.type === "Academic Guidance").length,
+    personal: apps.filter((a) => a.type === "Personal Concern").length,
+    career: apps.filter((a) => a.type === "Career Consultation").length,
+  };
 }

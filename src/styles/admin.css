@@ -112,32 +112,32 @@ td {
 }
 
 .settings-card {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 40px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 40px;
 }
 
 .field-desc {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-bottom: 10px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 10px;
 }
 
 .settings-form .form-group {
-    margin-bottom: 25px;
+  margin-bottom: 25px;
 }
 
 .settings-form label {
-    font-weight: 700;
-    display: block;
-    margin-bottom: 5px;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 5px;
 }
 
 .settings-form input {
-    width: 100%;
-    padding: 12px;
-    border-radius: var(--radius-md);
-    border: 1px solid #e2e8f0;
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid #e2e8f0;
 }
 
 /* --- APPOINTMENT TABLE ADDITIONS --- */
@@ -235,50 +235,240 @@ td {
 }
 /* Highlights the search bar when focused */
 #tableSearch:focus {
-    outline: none;
-    border-color: #38bdf8;
-    box-shadow: 0 0 5px rgba(56, 189, 248, 0.5);
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 5px rgba(56, 189, 248, 0.5);
 }
 
 /* Optional: Smooth transition for rows disappearing */
 #adminTable tbody tr {
-    transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .id-badge {
-    background: #f1f5f9;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-family: monospace;
-    color: #475569;
-    font-size: 0.85rem;
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  color: #475569;
+  font-size: 0.85rem;
 }
 
 .user-name {
-    font-weight: 600;
-    color: #1e293b;
+  font-weight: 600;
+  color: #1e293b;
 }
 .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
 }
 .stat-item {
-    background: #f8fafc;
-    padding: 20px;
-    border-radius: 12px;
-    text-align: center;
-    border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
 }
-.stat-value { font-size: 2rem; font-weight: bold; display: block; }
-.stat-value.success { color: #22c55e; }
-.stat-value.info { color: #3b82f6; }
+.stat-value {
+  font-size: 2rem;
+  font-weight: bold;
+  display: block;
+}
+.stat-value.success {
+  color: #22c55e;
+}
+.stat-value.info {
+  color: #3b82f6;
+}
 
 /* Simple CSS Bar Chart */
-.chart-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
-.chart-row span { width: 80px; font-size: 0.9rem; }
-.progress-bar { flex-grow: 1; height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden; }
-.progress { height: 100%; background: #3b82f6; transition: width 0.5s ease; }
-.progress.personal { background: #ec4899; }
-.progress.career { background: #f59e0b; }
+.chart-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+.chart-row span {
+  width: 80px;
+  font-size: 0.9rem;
+}
+.progress-bar {
+  flex-grow: 1;
+  height: 12px;
+  background: #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.progress {
+  height: 100%;
+  background: #3b82f6;
+  transition: width 0.5s ease;
+}
+.progress.personal {
+  background: #ec4899;
+}
+.progress.career {
+  background: #f59e0b;
+}
+
+/* --- COMPREHENSIVE MOBILE OVERHAUL --- */
+@media screen and (max-width: 768px) {
+  /* 1. Fix the Sidebar & Content Area overlap */
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative; /* Removes the "float" over content */
+    padding: 1rem;
+  }
+
+  .content-area {
+    margin-left: 0 !important; /* Removes the 280px gap */
+    padding: 15px;
+  }
+
+  /* 2. Fix Search Input Squashing */
+  .table-header-main {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  #tableSearch {
+    width: 100%;
+    padding: 12px;
+    box-sizing: border-box;
+  }
+
+  /* 3. The "Card" Transformation */
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    display: none; /* Hide headers on mobile */
+  }
+
+  tr {
+    background: white;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+  }
+
+  /* 4. Column Alignment (Label Left, Value Right) */
+  td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0 !important;
+    border-bottom: 1px solid #f8fafc;
+    text-align: right;
+  }
+
+  td:last-child {
+    border-bottom: none;
+  }
+
+  /* 5. Injecting the Labels */
+  td::before {
+    content: attr(data-label);
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    text-align: left;
+    flex-shrink: 0;
+  }
+
+  /* 6. Alignment for inner elements */
+  .user-info,
+  .date-info,
+  .action-btns {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .action-btns {
+    flex-direction: row; /* Buttons stay side-by-side */
+    gap: 10px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  /* 1. Remove that big white space at the top */
+  .admin-container {
+    display: block; /* Changes from flex to block for mobile stack */
+    min-height: 100vh;
+  }
+
+  /* 2. Fix the Sidebar to the Bottom (The App Look) */
+  .sidebar {
+    position: fixed !important; /* Force it to stay put */
+    bottom: 0 !important;
+    top: auto !important;
+    left: 0;
+    width: 100% !important;
+    height: 65px !important;
+    background: #ffffff !important;
+    display: flex !important;
+    flex-direction: row !important; /* Align buttons horizontally */
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-top: 1px solid #e2e8f0;
+    z-index: 9999; /* Ensure it's above everything */
+  }
+
+  /* 3. Style the buttons so they fit the bar */
+  .sidebar-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 0 !important;
+    margin: 0 !important;
+    gap: 2px !important;
+    font-size: 10px !important;
+    color: #64748b;
+    background: none;
+    border: none;
+  }
+
+  .sidebar-btn i {
+    font-size: 20px !important;
+    margin: 0 !important;
+  }
+
+  .sidebar-btn.active {
+    color: #3b82f6 !important;
+    background: none !important;
+    box-shadow: none !important;
+  }
+
+  /* 4. Fix the Content Area whitespace */
+  .content-area {
+    margin-left: 0 !important; /* Removes the sidebar gap */
+    padding: 15px !important;
+    padding-bottom: 80px !important; /* Prevents nav from covering data */
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* 5. Hide the Header text in the sidebar on mobile */
+  .sidebar-header,
+  .view-header h1 {
+    display: none;
+  }
+}
