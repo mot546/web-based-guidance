@@ -112,3 +112,60 @@
   text-decoration: underline;
   color: #2980b9;
 }
+
+/* Error Banner Styling */
+.error-banner {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  border: 1px solid #f87171;
+}
+
+.hidden { display: none; }
+
+/* CSS-Based Validations */
+/* 1. Base Input Style */
+.form-group input {
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 12px;
+    border: 2px solid #e2e8f0; /* Use a slightly thicker border for better visibility */
+    border-radius: 8px;
+    box-sizing: border-box;
+    transition: all 0.2s ease-in-out;
+    outline: none;
+}
+
+/* 2. Neutral State (When empty/placeholder is visible) */
+.form-group input:placeholder-shown {
+    border-color: #e2e8f0;
+}
+
+/* 3. Invalid State (Only once user starts typing) */
+.form-group input:not(:placeholder-shown):invalid {
+    border-color: #ef4444;
+    background-color: #fffafb;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* 4. Valid State (Only once user starts typing) */
+.form-group input:not(:placeholder-shown):valid {
+    border-color: #10b981;
+    background-color: #f6fff9;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* 5. Shake Animation (Keep this as is) */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+}
+
+.shake {
+    animation: shake 0.4s ease-in-out;
+}

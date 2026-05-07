@@ -1,7 +1,7 @@
 import "./styles/landing.css";
 
 export function renderLandingPage(root, onGetStarted) {
-    root.innerHTML = `
+  root.innerHTML = `
         <div class="landing-page">
             <nav class="glass-nav">
                 <div class="logo">
@@ -84,13 +84,13 @@ export function renderLandingPage(root, onGetStarted) {
         </div>
     `;
 
-    // Listeners
-    document.getElementById("getStartedBtn").onclick = onGetStarted;
-    document.getElementById("navLoginBtn").onclick = onGetStarted;
+  // Listeners
+  document.getElementById("getStartedBtn").onclick = onGetStarted;
+  document.getElementById("navLoginBtn").onclick = onGetStarted;
 
-    // View Services Smooth Scroll
-    document.getElementById("viewServicesBtn").onclick = () => {
-        const target = document.getElementById("services-section");
-        target.scrollIntoView({ behavior: "smooth", block: "start" });
-    };
+  // View Services Smooth Scroll
+  document.getElementById("viewServicesBtn").onclick = () => {
+    const target = document.getElementById("services-section");
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 }

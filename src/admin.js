@@ -3,85 +3,265 @@ import "./styles/admin.css";
 // --- VIEW COMPONENTS ---
 
 function renderAppointmentsTable() {
-  const appointments =
-    JSON.parse(localStorage.getItem("gh_appointments")) || [];
+    // 1. Get raw data from localStorage
+    const rawAppointments = JSON.parse(localStorage.getItem("gh_appointments")) || [];
 
-  let rows = `<tr><td colspan="6" class="empty-row">No appointment requests found.</td></tr>`;
+    // 2. Sort: Newest ID (highest timestamp) first
+    // We spread into a new array [...] to avoid mutating the original data if needed elsewhere
+    const appointments = [...rawAppointments].sort((a, b) => b.id - a.id);
 
-  if (appointments.length > 0) {
-    rows = appointments
-      .map(
-        (app) => `
-        <tr>
-            <td>${app.studentName}</td>
-            <td>${app.date}</td>
-            <td>${app.time}</td>
-            <td>${app.reason}</td>
-            <td><span class="badge ${app.status.toLowerCase()}">${app.status}</span></td>
-            <td>
-                <button class="icon-btn edit" data-id="${app.id}" title="Approve">
-                    <i class="material-icons">check</i>
-                </button>
-                <button class="icon-btn delete" data-id="${app.id}" title="Cancel">
-                    <i class="material-icons">close</i>
-                </button>
-            </td>
-        </tr>
-    `,
-      )
-      .join("");
-  }
-
-  return `
-    <section class="table-section">
-        <div class="table-card">
-            <div class="table-header">
-                <h3>Active Appointment Requests</h3>
-                <input type="text" id="tableSearch" placeholder="Search students...">
+    return `
+        <div class="admin-card">
+            <div class="card-header">
+                <h2><i class="material-icons">event_note</i> Appointment Requests</h2>
+                <div class="table-tools">
+                    <input type="text" id="tableSearch" placeholder="Search student name...">
+                </div>
             </div>
-            <table id="appointmentsTable">
-                <thead>
-                    <tr>
-                        <th>Student Name</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Reason</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="appointmentsBody">${rows}</tbody>
-            </table>
+            <div class="table-container">
+                <table id="adminTable">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Type</th>
+                            <th>Date & Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${appointments.length > 0 ? appointments.map(app => `
+                            <tr>
+                                <td>
+                                    <div class="user-info">
+                                        <span class="user-name">${app.studentName}</span>
+                                        <span class="user-email">${app.studentEmail || 'no-email'}</span>
+                                    </div>
+                                </td>
+                                <td><span class="type-tag">${app.type}</span></td>
+                                <td>
+                                    <div class="date-info">
+                                        <div>${app.date}</div>
+                                        <small>${app.time}</small>
+                                    </div>
+                                </td>
+                                <td><span class="status-pill ${app.status}">${app.status}</span></td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-approve" onclick="updateAppStatus(${app.id}, 'approved')" title="Approve">
+                                            <i class="material-icons">check</i>
+                                        </button>
+                                        <button class="btn-reject" onclick="updateAppStatus(${app.id}, 'rejected')" title="Reject">
+                                            <i class="material-icons">close</i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('') : '<tr><td colspan="5" class="empty-row">No appointment requests found.</td></tr>'}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </section>
-  `;
+    `;
 }
+/* Inside src/admin.js */
+
+window.updateAppStatus = (id, newStatus) => {
+    // 1. Get the latest data
+    let appointments = JSON.parse(localStorage.getItem("gh_appointments")) || [];
+    
+    // 2. Update the specific appointment
+    appointments = appointments.map(app => {
+        if (app.id === id) return { ...app, status: newStatus };
+        return app;
+    });
+
+    // 3. Save back to localStorage
+    localStorage.setItem("gh_appointments", JSON.stringify(appointments));
+    
+    // 4. FIX: Safely find the content area
+    const content = document.getElementById("dynamic-content");
+    
+    if (content) {
+        // Re-render the specific view (Appointments Table)
+        content.innerHTML = renderAppointmentsTable();
+    } else {
+        // Fallback: If the element is missing, refresh the whole page 
+        // to ensure data sync (useful for edge cases)
+        window.location.reload();
+    }
+};
+/* Inside src/admin.js */
 
 function renderStudentRecords() {
-  return `
-    <section class="placeholder-section">
-        <div class="table-card">
-            <h3><i class="material-icons">people</i> Student Records</h3>
-            <p>Database of all registered students in the system.</p>
-            <hr>
-            <p><i>(logic coming soon)</i></p>
+    // 1. Get all users and filter for students
+    const allUsers = JSON.parse(localStorage.getItem("gh_users")) || [];
+    const students = allUsers.filter(user => user.role === "student");
+
+    return `
+        <div class="admin-card">
+            <div class="card-header">
+                <h2><i class="material-icons">people</i> Student Directory</h2>
+                <div class="table-tools">
+                    <input type="text" id="studentSearch" placeholder="Search by name or email...">
+                </div>
+            </div>
+            <div class="table-container">
+                <table id="studentTable">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Email Address</th>
+                            <th>Account ID</th>
+                            <th>Joined Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${students.length > 0 ? students.map(std => `
+                            <tr>
+                                <td class="user-name">${std.name}</td>
+                                <td>${std.email}</td>
+                                <td><code class="id-badge">${std.id}</code></td>
+                                <td>${std.joinedDate || 'N/A'}</td>
+                            </tr>
+                        `).join('') : '<tr><td colspan="4" class="empty-row">No registered students found.</td></tr>'}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </section>
-  `;
+    `;
 }
 
 function renderReports() {
-  return `
-    <section class="placeholder-section">
-        <div class="table-card">
-            <h3><i class="material-icons">bar_chart</i> Analytics & Reports</h3>
+    const stats = getAnalytics();
+    
+    // Calculate percentages for the progress bars
+    const getWidth = (count) => stats.totalApps > 0 ? (count / stats.totalApps) * 100 : 0;
+
+    return `
+        <div class="admin-card">
+            <div class="card-header">
+                <h2><i class="material-icons">analytics</i> System Analytics</h2>
+            </div>
+            
             <div class="stats-grid">
-                <div class="stat-card"><h3>0</h3><p>Total Sessions</p></div>
-                <div class="stat-card"><h3>0%</h3><p>Attendance Rate</p></div>
+                <div class="stat-item">
+                    <span class="stat-label">Total Requests</span>
+                    <span class="stat-value">${stats.totalApps}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Approved</span>
+                    <span class="stat-value success">${stats.approved}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Registered Students</span>
+                    <span class="stat-value info">${stats.totalStudents}</span>
+                </div>
+            </div>
+
+            <div class="reports-body">
+                <h3>Appointment Type Distribution</h3>
+                <div class="chart-mock">
+                    <div class="chart-row">
+                        <span>Academic</span>
+                        <div class="progress-bar"><div class="progress" style="width: ${getWidth(stats.academic)}%"></div></div>
+                        <span>${stats.academic}</span>
+                    </div>
+                    <div class="chart-row">
+                        <span>Personal</span>
+                        <div class="progress-bar"><div class="progress personal" style="width: ${getWidth(stats.personal)}%"></div></div>
+                        <span>${stats.personal}</span>
+                    </div>
+                    <div class="chart-row">
+                        <span>Career</span>
+                        <div class="progress-bar"><div class="progress career" style="width: ${getWidth(stats.career)}%"></div></div>
+                        <span>${stats.career}</span>
+                    </div>
+                </div>
             </div>
         </div>
-    </section>
-  `;
+    `;
+}
+
+export function renderAdminSettings() {
+    // Retrieve currently saved email or use a default
+    const savedEmail = localStorage.getItem("admin_notification_email") || "admin@granby.edu";
+
+    return `
+        <div class="glass-card settings-card">
+            <div class="card-header">
+                <h2><i class="material-icons">settings</i> System Settings</h2>
+                <p>Configure how the Guidance System handles notifications.</p>
+            </div>
+            
+            <form id="settingsForm" class="settings-form">
+                <div class="form-group">
+                    <label for="adminEmail">Notification Recipient Email</label>
+                    <p class="field-desc">This is where student appointment requests will be sent via EmailJS.</p>
+                    <input type="email" id="adminEmail" value="${savedEmail}" required>
+                </div>
+                
+                <div class="settings-actions">
+                    <button type="submit" class="primary-btn">Save Configurations</button>
+                </div>
+            </form>
+        </div>
+    `;
+}
+function setupTableSearch() {
+    const searchInput = document.getElementById("tableSearch");
+    const table = document.getElementById("adminTable");
+    
+    // Debugging: Check if elements exist when function runs
+    if (!searchInput || !table) {
+        console.error("Search elements not found in DOM");
+        return;
+    }
+
+    console.log("Search listener attached successfully");
+
+    searchInput.addEventListener("input", () => {
+        const filter = searchInput.value.toLowerCase().trim();
+        const tbody = table.querySelector("tbody");
+        const rows = tbody.querySelectorAll("tr");
+
+        rows.forEach(row => {
+            // This captures everything in the row (Name, Email, and Type)
+            const rowText = row.textContent.toLowerCase();
+            
+            if (rowText.includes(filter)) {
+                row.style.display = ""; // Show
+            } else {
+                row.style.display = "none"; // Hide
+            }
+        });
+    });
+}
+function setupStudentSearch() {
+    const searchInput = document.getElementById("studentSearch");
+    const table = document.getElementById("studentTable");
+    
+    // Safety check: if the elements aren't there yet, stop
+    if (!searchInput || !table) {
+        console.error("Student search input or table not found!");
+        return;
+    }
+
+    searchInput.addEventListener("input", () => {
+        const filter = searchInput.value.toLowerCase().trim();
+        const rows = table.querySelectorAll("tbody tr");
+
+        rows.forEach(row => {
+            // This gets all the text in the row (Name, Email, ID)
+            const textValue = row.textContent.toLowerCase();
+            
+            if (textValue.includes(filter)) {
+                row.style.display = ""; // Show
+            } else {
+                row.style.display = "none"; // Hide
+            }
+        });
+    });
 }
 
 // --- MAIN RENDERER ---
@@ -112,6 +292,9 @@ export function renderAdminView(root, session, onLogout) {
                 </button>
                 <button class="nav-item" data-target="reports">
                     <i class="material-icons">bar_chart</i> Reports
+                </button>
+                <button class="nav-item" data-target="settings">
+                    <i class="material-icons">settings</i> Settings
                 </button>
                 <button class="nav-item logout" id="adminLogoutBtn">
                     <i class="material-icons">power_settings_new</i> Logout
@@ -149,7 +332,7 @@ export function renderAdminView(root, session, onLogout) {
 function setupAdminListeners(onLogout) {
   const content = document.getElementById("admin-dynamic-content");
   const navButtons = document.querySelectorAll(".nav-item:not(.logout)");
-  
+
   // Mobile elements
   const sidebar = document.getElementById("admin-sidebar");
   const overlay = document.getElementById("admin-overlay");
@@ -172,15 +355,24 @@ function setupAdminListeners(onLogout) {
       btn.classList.add("active");
 
       const target = btn.getAttribute("data-target");
-
+      
       if (target === "appointments") {
         content.innerHTML = renderAppointmentsTable();
-        attachTableSearch();
+        setTimeout(() => {
+        setupTableSearch();
+    }, 0);
       } else if (target === "students") {
         content.innerHTML = renderStudentRecords();
+        setTimeout(() => {
+        setupStudentSearch();
+    }, 0);
       } else if (target === "reports") {
         content.innerHTML = renderReports();
-      }
+        
+      }else if (target === "settings") {
+            content.innerHTML = renderAdminSettings();
+            attachSettingsListener(); 
+        }
 
       // Auto-close on mobile
       if (window.innerWidth <= 768 && sidebar.classList.contains("active")) {
@@ -188,25 +380,50 @@ function setupAdminListeners(onLogout) {
       }
     };
   });
+  function attachSettingsListener() {
+    const form = document.getElementById("settingsForm");
+    if (!form) return;
 
-  attachTableSearch();
+    form.onsubmit = (e) => {
+        e.preventDefault();
+        const email = document.getElementById("adminEmail").value;
+        
+        // Save to localStorage
+        localStorage.setItem("admin_notification_email", email);
+        
+        // Visual feedback
+        const btn = form.querySelector("button");
+        btn.innerText = "Settings Saved!";
+        btn.style.background = "#10b981"; // Success green
+
+        setTimeout(() => {
+            btn.innerText = "Save Configurations";
+            btn.style.background = ""; // Revert to primary
+        }, 2000);
+    };
+}
+
 
   // Centralized Logout
   document.getElementById("adminLogoutBtn").onclick = onLogout;
 
-  document.getElementById("refreshData").onclick = () => window.location.reload();
+  document.getElementById("refreshData").onclick = () =>
+    window.location.reload();
 }
-// Helper for Search functionality
-function attachTableSearch() {
-  const searchInput = document.getElementById("tableSearch");
-  if (!searchInput) return;
 
-  searchInput.onkeyup = (e) => {
-    const term = e.target.value.toLowerCase();
-    const rows = document.querySelectorAll("#appointmentsBody tr");
-    rows.forEach((row) => {
-      const text = row.innerText.toLowerCase();
-      row.style.display = text.includes(term) ? "" : "none";
-    });
-  };
+function getAnalytics() {
+    const apps = JSON.parse(localStorage.getItem("gh_appointments")) || [];
+    const users = JSON.parse(localStorage.getItem("gh_users")) || [];
+    
+    return {
+        totalApps: apps.length,
+        approved: apps.filter(a => a.status === 'approved').length,
+        pending: apps.filter(a => a.status === 'pending').length,
+        rejected: apps.filter(a => a.status === 'rejected').length,
+        totalStudents: users.filter(u => u.role === 'student').length,
+        // Breakdown by type
+        academic: apps.filter(a => a.type === 'Academic Guidance').length,
+        personal: apps.filter(a => a.type === 'Personal Concern').length,
+        career: apps.filter(a => a.type === 'Career Consultation').length
+    };
 }

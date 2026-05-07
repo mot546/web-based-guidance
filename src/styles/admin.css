@@ -24,8 +24,8 @@
 
 .content-area {
   /* This is the most important line for your layout */
-  margin-left: var(--sidebar-width, 280px); 
-  
+  margin-left: var(--sidebar-width, 280px);
+
   flex: 1;
   padding: 40px;
   box-sizing: border-box;
@@ -110,3 +110,175 @@ td {
   padding: 16px 20px;
   border-bottom: 1px solid #f1f5f9;
 }
+
+.settings-card {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 40px;
+}
+
+.field-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.settings-form .form-group {
+    margin-bottom: 25px;
+}
+
+.settings-form label {
+    font-weight: 700;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.settings-form input {
+    width: 100%;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid #e2e8f0;
+}
+
+/* --- APPOINTMENT TABLE ADDITIONS --- */
+
+/* Action Button Container */
+.action-btns {
+  display: flex;
+  gap: 10px;
+}
+
+/* Base style for table buttons */
+.action-btns button {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md, 8px);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+/* Approve Button */
+.btn-approve {
+  background: #dcfce7; /* Light green */
+  color: #166534;
+}
+
+.btn-approve:hover {
+  background: #166534;
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Reject Button */
+.btn-reject {
+  background: #fee2e2; /* Light red */
+  color: #991b1b;
+}
+
+.btn-reject:hover {
+  background: #991b1b;
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Status Pills */
+.status-pill {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-pill.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-pill.approved {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-pill.rejected {
+  background: #f1f5f9;
+  color: #64748b;
+  text-decoration: line-through;
+}
+
+/* Table Empty State */
+.empty-row {
+  text-align: center;
+  padding: 40px !important;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* User Info Styling (Name + Email in one cell) */
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-weight: 700;
+  color: var(--text-dark, #1e293b);
+}
+
+.user-email {
+  font-size: 0.75rem;
+  color: var(--text-muted, #64748b);
+}
+/* Highlights the search bar when focused */
+#tableSearch:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: 0 0 5px rgba(56, 189, 248, 0.5);
+}
+
+/* Optional: Smooth transition for rows disappearing */
+#adminTable tbody tr {
+    transition: opacity 0.2s ease;
+}
+
+.id-badge {
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    color: #475569;
+    font-size: 0.85rem;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #1e293b;
+}
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+.stat-item {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+}
+.stat-value { font-size: 2rem; font-weight: bold; display: block; }
+.stat-value.success { color: #22c55e; }
+.stat-value.info { color: #3b82f6; }
+
+/* Simple CSS Bar Chart */
+.chart-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+.chart-row span { width: 80px; font-size: 0.9rem; }
+.progress-bar { flex-grow: 1; height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden; }
+.progress { height: 100%; background: #3b82f6; transition: width 0.5s ease; }
+.progress.personal { background: #ec4899; }
+.progress.career { background: #f59e0b; }
