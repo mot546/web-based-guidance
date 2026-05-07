@@ -60,7 +60,7 @@ function handleLogin(identifier, p, showError) {
   }
 }
 
-function handleRegister(name, u, p, email, showError) {
+function handleRegister(name, u, p, email, showError, showSuccess) {
   const users = JSON.parse(localStorage.getItem("gh_users")) || [];
   const exists = users.some((user) => user.user === u || user.email === email);
 
@@ -76,11 +76,18 @@ function handleRegister(name, u, p, email, showError) {
     email,
     role: "student",
   };
+  
   users.push(newUser);
   localStorage.setItem("gh_users", JSON.stringify(users));
 
-  const root = document.getElementById("app");
-  renderLoginPage(root, handleLogin, handleRegister);
+  // If the showSuccess callback exists (from your auth.js), run it!
+  if (showSuccess) {
+    showSuccess();
+  } else {
+    // Fallback in case something goes wrong with the callback
+    const root = document.getElementById("app");
+    renderLoginPage(root, handleLogin, handleRegister);
+  }
 }
 
 // --- ROUTER ---

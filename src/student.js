@@ -1,151 +1,253 @@
 import "./styles/student.css";
 import emailjs from "@emailjs/browser";
+import { 
+    format, 
+    startOfMonth, 
+    endOfMonth, 
+    getDay, 
+    getDate, 
+    isSameMonth,
+    isSameDay
+} from 'date-fns';
 
 emailjs.init("6_rFpZEVOh3AVEsIM");
 
 // --- VIEW COMPONENTS ---
+export function renderRightSidebar(myApps) {
+    const now = new Date();
+    
+    // 1. Get the single next approved appointment
+    const nextApp = myApps
+        .filter(a => a.status.toLowerCase() === 'approved' && new Date(a.date) >= now)
+        .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
 
-function renderDashboard() {
-  // Logic to fetch counts from localStorage
-  const allAppointments =
-    JSON.parse(localStorage.getItem("gh_appointments")) || [];
-  const session = JSON.parse(localStorage.getItem("gh_session"));
-  const myApps = allAppointments.filter((app) => app.studentId === session.id);
+    // 2. Build the Calendar HTML
+    const startDay = getDay(startOfMonth(now)); 
+    const totalDays = getDate(endOfMonth(now));
+    const padding = Array(startDay).fill('<div class="day-num muted"></div>');
+    const days = [];
 
-  const pending = myApps.filter((a) => a.status === "pending").length;
-  const approved = myApps.filter((a) => a.status === "approved").length;
+    for (let d = 1; d <= totalDays; d++) {
+        const currentIterationDate = new Date(now.getFullYear(), now.getMonth(), d);
+        const isToday = isSameDay(currentIterationDate, now) ? 'today' : '';
+        const hasEvent = myApps.some(app => 
+            isSameDay(new Date(app.date), currentIterationDate) && 
+            app.status.toLowerCase() === 'approved'
+        ) ? 'has-event' : '';
+        
+        days.push(`<div class="day-num ${isToday} ${hasEvent}">${d}</div>`);
+    }
 
-  return `
-    <div class="stats-grid">
-        <div class="stat-card">
-            <i class="material-icons">pending_actions</i>
-            <h3>Pending</h3>
-            <p id="pending-count">${pending}</p>
-        </div>
-        <div class="stat-card">
-            <i class="material-icons">check_circle</i>
-            <h3>Approved</h3>
-            <p id="approved-count">${approved}</p>
-        </div>
-    </div>
-    <div class="upcoming-appointments">
-        <h3>Your Appointments</h3>
-        <div id="appointment-list" class="list-container">
-            ${
-              myApps.length > 0
-                ? myApps
-                    .map(
-                      (app) => `
-                <div class="appointment-item card">
-                    <div class="app-info">
-                        <strong>${app.type}</strong>
-                        <span><i class="material-icons">event</i> ${app.date} at ${app.time}</span>
+    // 3. Return the Sidebar HTML string
+    return `
+        <aside class="right-sidebar">
+            <div class="next-up-card">
+                <div class="card-tag">NEXT SESSION</div>
+                ${nextApp ? `
+                    <div class="next-app-info">
+                        <h2>${format(new Date(nextApp.date), 'MMMM dd, yyyy')}</h2>
+                        <p>${nextApp.time} | Guidance Office</p>
                     </div>
-                    <span class="status-pill ${app.status}">${app.status}</span>
+                ` : `<p style="font-size:0.8rem; color:#94a3b8; margin-top:10px;">No upcoming sessions.</p>`}
+            </div>
+
+            <div class="calendar-card">
+                <div class="calendar-header">
+                    <span style="font-weight:800;">${format(now, 'MMMM yyyy')}</span>
                 </div>
-            `,
-                    )
-                    .join("")
-                : '<p class="empty-msg">No appointments found. Use the sidebar to book one!</p>'
-            }
-        </div>
-    </div>
-  `;
+                <div class="calendar-grid">
+                    <div class="day-name">S</div><div class="day-name">M</div><div class="day-name">T</div>
+                    <div class="day-name">W</div><div class="day-name">T</div><div class="day-name">F</div>
+                    <div class="day-name">S</div>
+                    ${padding.join('')}${days.join('')}
+                </div>
+            </div>
+
+            <div class="support-card">
+                <h4>Support</h4>
+                <p style="font-size: 0.85rem;">Office hours: 8AM - 5PM.</p>
+            </div>
+        </aside>
+    `;
 }
+export function renderDashboard(session = {}) {
+    // 1. Data Retrieval & Filtering
+    const appointments = JSON.parse(localStorage.getItem("gh_appointments")) || [];
+    const myApps = appointments.filter(a => 
+        a.studentId === session.id || a.studentEmail === session.email
+    );
 
-function renderBookingForm() {
-  return `
-    <div class="card booking-card">
-        <h3><i class="material-icons">add_circle</i> Book New Appointment</h3>
-        <p>Fill out the form below to schedule a session.</p>
-        <hr>
-        <div id="booking-error" class="error-banner hidden"></div>
-        <form id="appointment-form">
-            <div class="form-group">
-                <label>Counseling Type</label>
-                <select id="appType" required>
-                    <option value="">Select a reason...</option>
-                    <option value="Academic Guidance">Academic Guidance</option>
-                    <option value="Personal Concern">Personal Concern</option>
-                    <option value="Career Consultation">Career Consultation</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Date</label>
-                <input type="date" id="appDate" required min="${new Date().toISOString().split("T")[0]}">
-            </div>
-            <div class="form-group">
-                <label>Time</label>
-                <input type="time" id="appTime" required>
-            </div>
-            <div class="form-group">
-                <label>Additional Notes (Optional)</label>
-                <textarea id="appNotes" placeholder="Tell us more about your concern..."></textarea>
-            </div>
-            <button type="submit" id="submitBooking" class="primary-btn">Confirm Booking</button>
-        </form>
-    </div>
-  `;
-}
-function renderHistory() {
-  // 1. Get the current logged-in user session
-  const session = JSON.parse(localStorage.getItem("gh_session"));
+    const pendingCount = myApps.filter(a => a.status === 'pending').length;
+    const approvedCount = myApps.filter(a => a.status === 'approved').length;
 
-  // 2. Get all appointments and filter for this specific student
-  const allApps = JSON.parse(localStorage.getItem("gh_appointments")) || [];
-  const myApps = allApps.filter((app) => app.studentEmail === session.email);
+    // 2. Return the combined view
+    return `
+        <div class="dashboard-wrapper">
+            <div class="dashboard-main-col">
+                <div class="dashboard-hero" style="padding-top: 40px;"> 
+                    <span class="badge">Student Portal</span>
+                    <h1>Welcome Back, ${session.name || 'Student'}!</h1>
+                    <p>You have <strong>${pendingCount}</strong> pending requests.</p>
+                </div>
 
-  // 3. Sort so the most recent is at the top
-  const sortedApps = [...myApps].sort((a, b) => b.id - a.id);
-
-  return `
-        <div class="student-card">
-            <div class="card-header">
-                <h2><i class="material-icons">history</i> My Appointment History</h2>
-                <p>Track the status of your guidance requests below.</p>
-            </div>
-            <div class="history-list">
-                ${
-                  sortedApps.length > 0
-                    ? sortedApps
-                        .map(
-                          (app) => `
-                    <div class="history-item ${app.status}">
-                        <div class="history-main">
-                            <div class="history-icon">
-                                <i class="material-icons">${getStatusIcon(app.status)}</i>
-                            </div>
-                            <div class="history-info">
-                                <span class="app-type">${app.type}</span>
-                                <span class="app-date">${app.date} at ${app.time}</span>
-                            </div>
-                        </div>
-                        <div class="history-status">
-                            <span class="status-badge">${app.status.toUpperCase()}</span>
-                        </div>
+                <div class="stats-grid-horizontal">
+                    <div class="stat-box">
+                        <span class="label">Total Sessions</span>
+                        <span class="value">${myApps.length}</span>
                     </div>
-                `,
-                        )
-                        .join("")
-                    : `
-                    <div class="empty-history">
-                        <i class="material-icons">event_busy</i>
-                        <p>You haven't made any appointments yet.</p>
+                    <div class="stat-box">
+                        <span class="label">Confirmed</span>
+                        <span class="value" style="color: #22c55e;">${approvedCount}</span>
                     </div>
-                `
-                }
+                    <div class="stat-box">
+                        <span class="label">Status</span>
+                        <span class="value" style="font-size: 0.9rem; color: #3b82f6;">● Verified User</span>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="card-header-flex" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h3>Recent History</h3>
+                        <button class="view-all-btn" onclick="document.querySelector('[data-target=records]').click()">View All</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr><th>Date</th><th>Type</th><th>Status</th></tr>
+                            </thead>
+                            <tbody>
+                                ${myApps.slice(0, 5).map(app => `
+                                    <tr>
+                                        <td><strong>${format(new Date(app.date), 'MMMM dd, yyyy')}</strong></td>
+                                        <td>${app.type}</td>
+                                        <td><span class="status-pill ${app.status.toLowerCase()}">${app.status}</span></td>
+                                    </tr>
+                                `).join('') || '<tr><td colspan="3" style="text-align:center; padding:20px;">No appointments yet.</td></tr>'}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
+
+            ${renderRightSidebar(myApps)}
         </div>
     `;
 }
+export function renderBookingForm(session = {}) {
+  // 1. Get data for the sidebar
+  const allAppointments = JSON.parse(localStorage.getItem("gh_appointments")) || [];
+  const myApps = allAppointments.filter(a => a.studentId === session.id);
 
-// Helper to change the icon based on status
-function getStatusIcon(status) {
-  if (status === "approved") return "check_circle";
-  if (status === "rejected") return "cancel";
-  return "pending";
+  return `
+    <div class="dashboard-wrapper">
+        <div class="dashboard-main-col">
+            <div class="dashboard-hero" style="padding-top: 40px;">
+                <span class="badge">Scheduling</span>
+                <h1>Book an Appointment</h1>
+                <p>Select a date and time that works for you.</p>
+            </div>
+
+            <div class="table-card booking-container">
+                <div id="booking-error" class="error-banner hidden"></div>
+                
+                <form id="appointment-form" class="styled-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="appType">Counseling Type</label>
+                            <select id="appType" required>
+                                <option value="">Select a reason...</option>
+                                <option value="Academic Guidance">Academic Guidance</option>
+                                <option value="Personal Concern">Personal Concern</option>
+                                <option value="Career Consultation">Career Consultation</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row flex-row">
+                        <div class="form-group">
+                            <label for="appDate">Preferred Date</label>
+                            <input type="date" id="appDate" required min="${new Date().toISOString().split("T")[0]}">
+                        </div>
+                        <div class="form-group">
+                            <label for="appTime">Preferred Time</label>
+                            <input type="time" id="appTime" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="appNotes">Additional Notes (Optional)</label>
+                        <textarea id="appNotes" rows="4" placeholder="Briefly describe your concern..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" id="submitBooking" class="primary-btn">
+                            <i class="material-icons">check_circle</i> Confirm Booking
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        ${renderRightSidebar(myApps)}
+    </div>
+  `;
 }
+export function renderHistory(session = {}) {
+    // 1. Data Retrieval
+    const allApps = JSON.parse(localStorage.getItem("gh_appointments")) || [];
+    const myApps = allApps.filter((app) => app.studentEmail === session.email);
 
+    // 2. Sort by ID (assuming higher ID = newer)
+    const sortedApps = [...myApps].sort((a, b) => b.id - a.id);
+
+    return `
+        <div class="dashboard-wrapper">
+            <div class="dashboard-main-col">
+                <div class="dashboard-hero" style="padding-top: 40px;"> 
+                    <span class="badge">Records</span>
+                    <h1>Appointment History</h1>
+                    <p>Track and manage your past and upcoming guidance requests.</p>
+                </div>
+
+                <div class="table-card history-container">
+                    <div class="history-list">
+                        ${sortedApps.length > 0 ? sortedApps.map(app => `
+                            <div class="history-item ${app.status.toLowerCase()}">
+                                <div class="history-main">
+                                    <div class="history-icon">
+                                        <i class="material-icons">${getStatusIcon(app.status)}</i>
+                                    </div>
+                                    <div class="history-info">
+                                        <span class="app-type">${app.type}</span>
+                                        <span class="app-date">${format(new Date(app.date), 'MMMM dd, yyyy')} • ${app.time}</span>
+                                    </div>
+                                </div>
+                                <div class="history-status">
+                                    <span class="status-badge">${app.status.toUpperCase()}</span>
+                                </div>
+                            </div>
+                        `).join("") : `
+                            <div class="empty-history">
+                                <i class="material-icons">event_busy</i>
+                                <p>You haven't made any appointments yet.</p>
+                            </div>
+                        `}
+                    </div>
+                </div>
+            </div>
+
+            ${renderRightSidebar(myApps)}
+        </div>
+    `;
+}
+function getStatusIcon(status) {
+    switch (status.toLowerCase()) {
+        case 'approved': return 'check_circle';
+        case 'pending': return 'schedule';
+        case 'rejected': return 'cancel';
+        default: return 'event';
+    }
+}
 // --- LOGIC FUNCTIONS ---
 
 function attachBookingListener(session) {
@@ -233,16 +335,14 @@ export function renderStudentView(root, session, onLogout) {
         </aside>
         <main class="content-area">
             <header>
-                    <div class="header-content">
-              <button id="mobileMenuBtn" class="mobile-only-btn">
-                  <i class="material-icons">menu</i>
-              </button>
-              <div class="header-text">
-                  <h1>Welcome, ${session.name}!</h1>
-              </div>
-          </div>
+                <div class="header-content">
+                    
+                    <div class="header-text">
+                        <h1>Welcome, ${session.name}!</h1>
+                    </div>
+                </div>
             </header>
-            <section id="dynamic-content">${renderDashboard()}</section>
+            <section id="dynamic-content">${renderDashboard(session)}</section>
         </main>
     </div>
   `;
@@ -256,15 +356,13 @@ function setupStudentListeners(onLogout, session) {
   const sidebar = document.getElementById("sidebar");
   const mobileMenuBtn = document.getElementById("mobileMenuBtn");
 
-  // --- NEW: Toggle Logic ---
   if (mobileMenuBtn && sidebar) {
     mobileMenuBtn.onclick = (e) => {
-      e.stopPropagation(); // Prevents click from bubbling
+      e.stopPropagation();
       sidebar.classList.toggle("active");
     };
   }
 
-  // Close sidebar when clicking outside on mobile
   document.addEventListener("click", (e) => {
     if (
       window.innerWidth <= 768 &&
@@ -281,22 +379,26 @@ function setupStudentListeners(onLogout, session) {
       navButtons.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
 
-      // Auto-close sidebar on mobile after selecting an item
       if (window.innerWidth <= 768) {
         sidebar.classList.remove("active");
       }
 
       const target = btn.getAttribute("data-target");
+      
+      // FIX: Pass 'session' into these function calls
       if (target === "dashboard") {
-        content.innerHTML = renderDashboard();
+        content.innerHTML = renderDashboard(session);
       } else if (target === "book") {
-        content.innerHTML = renderBookingForm();
+        content.innerHTML = renderBookingForm(session);
         attachBookingListener(session);
       } else if (target === "records") {
-        content.innerHTML = renderHistory();
+        content.innerHTML = renderHistory(session);
       }
     };
   });
 
-  document.getElementById("logoutBtn").onclick = onLogout;
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+      logoutBtn.onclick = onLogout;
+  }
 }
