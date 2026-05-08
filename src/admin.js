@@ -114,7 +114,7 @@ function renderStudentRecords() {
             <div class="card-header">
                 <h2><i class="material-icons">people</i> Student Directory</h2>
                 <div class="table-tools">
-                    <input type="text" id="studentSearch" placeholder="Search by name or email...">
+                    <input type="text" id="studentSearch" placeholder="Search by name, course, or email...">
                 </div>
             </div>
             <div class="table-container">
@@ -122,9 +122,10 @@ function renderStudentRecords() {
                     <thead>
                         <tr>
                             <th>Student Name</th>
+                            <th>Year Level</th>
+                            <th>Course & Section</th>
                             <th>Email Address</th>
                             <th>Account ID</th>
-                            <th>Joined Date</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -134,15 +135,25 @@ function renderStudentRecords() {
                                 .map(
                                   (std) => `
                             <tr>
-                                <td class="user-name">${std.name}</td>
+                                <td class="user-name">
+                                    <strong>${std.name}</strong>
+                                </td>
+                                <td>
+                                    <span class="level-badge">${std.yearLevel || "N/A"}</span>
+                                </td>
+                                <td>
+                                    <div class="course-info">
+                                        <span class="course-text">${std.course || "N/A"}</span>
+                                        <small class="section-text">${std.section ? `- ${std.section}` : ""}</small>
+                                    </div>
+                                </td>
                                 <td>${std.email}</td>
                                 <td><code class="id-badge">${std.id}</code></td>
-                                <td>${std.joinedDate || "N/A"}</td>
                             </tr>
                         `,
                                 )
                                 .join("")
-                            : '<tr><td colspan="4" class="empty-row">No registered students found.</td></tr>'
+                            : '<tr><td colspan="5" class="empty-row">No registered students found.</td></tr>'
                         }
                     </tbody>
                 </table>
@@ -150,7 +161,6 @@ function renderStudentRecords() {
         </div>
     `;
 }
-
 function renderReports() {
   const stats = getAnalytics();
 
@@ -206,7 +216,7 @@ function renderReports() {
 export function renderAdminSettings() {
   // Retrieve currently saved email or use a default
   const savedEmail =
-    localStorage.getItem("admin_notification_email") || "admin@granby.edu";
+    localStorage.getItem("admin_notification_email") || "jellopancake213@gmail.com";
 
   return `
         <div class="glass-card settings-card">
@@ -218,7 +228,7 @@ export function renderAdminSettings() {
             <form id="settingsForm" class="settings-form">
                 <div class="form-group">
                     <label for="adminEmail">Notification Recipient Email</label>
-                    <p class="field-desc">This is where student appointment requests will be sent via EmailJS.</p>
+                    <p class="field-desc">This is where student appointment requests will be sent.</p>
                     <input type="email" id="adminEmail" value="${savedEmail}" required>
                 </div>
                 
@@ -289,9 +299,6 @@ function setupStudentSearch() {
 export function renderAdminView(root, session, onLogout) {
   root.innerHTML = `
     <div class="admin-container">
-        <button id="admin-menu-toggle" class="menu-btn mobile-only">
-            <i class="material-icons">menu</i>
-        </button>
 
         <aside class="sidebar" id="admin-sidebar">
             <div class="sidebar-header">
@@ -299,9 +306,6 @@ export function renderAdminView(root, session, onLogout) {
                     <i class="material-icons">gavel</i>
                     <span>Admin Panel</span>
                 </div>
-                <button id="admin-close-sidebar" class="close-btn mobile-only">
-                    <i class="material-icons">close</i>
-                </button>
             </div>
             
             <nav id="admin-nav">

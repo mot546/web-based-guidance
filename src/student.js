@@ -111,7 +111,7 @@ export function renderDashboard(session = {}) {
                     </div>
                     <div class="stat-box">
                         <span class="label">Status</span>
-                        <span class="value" style="font-size: 0.9rem; color: #3b82f6;">● Verified User</span>
+                        <span class="value" style="font-size: 0.9rem; color: #3b82f6;">● Active Student</span>
                     </div>
                 </div>
 
@@ -267,6 +267,69 @@ export function renderHistory(session = {}) {
         </div>
     `;
 }
+function renderSettings(container, session) {
+
+
+  container.innerHTML = `
+    <div class="settings-card">
+        <div class="card-header">
+            <h2><i class="material-icons">settings</i> Account Settings</h2>
+        </div>
+        <form id="settingsForm" class="settings-form">
+            <div class="input-wrapper plain">
+                <label>Full Name</label>
+                <input type="text" id="setName" value="${session.name || ''}" required>
+            </div>
+            <div class="input-wrapper plain">
+                <label>Email Address</label>
+                <input type="email" id="setEmail" value="${session.email || ''}" required>
+            </div>
+            <div class="input-group-row">
+                 <div class="input-wrapper plain">
+                    <label>Course</label>
+                    <input type="text" id="setCourse" value="${session.course || ''}" placeholder="e.g. BSIT" required>
+                </div>
+                <div class="input-wrapper plain">
+                    <label>Section</label>
+                    <input type="text" id="setSection" value="${session.section || ''}" placeholder="e.g. 1A" required>
+                </div>
+            </div>
+            <button type="submit" class="primary-btn">
+                <i class="material-icons">save</i> Save Changes
+            </button>
+        </form>
+    </div>
+  `;
+
+  // Re-attach the submit listener
+  const form = document.getElementById("settingsForm");
+  form.onsubmit = (e) => {
+    e.preventDefault();
+
+    const updatedData = {
+      name: document.getElementById("setName").value.trim(),
+      email: document.getElementById("setEmail").value.trim(),
+      course: document.getElementById("setCourse").value.trim(),
+      section: document.getElementById("setSection").value.trim(),
+    };
+
+    const users = JSON.parse(localStorage.getItem("gh_users")) || [];
+    const userIndex = users.findIndex(u => u.id === session.id);
+
+    if (userIndex !== -1) {
+      // Update DB
+      users[userIndex] = { ...users[userIndex], ...updatedData };
+      localStorage.setItem("gh_users", JSON.stringify(users));
+
+      // Update Session
+      const newSession = { ...session, ...updatedData };
+      localStorage.setItem("gh_session", JSON.stringify(newSession));
+
+      alert("Profile updated successfully!");
+      window.location.reload(); 
+    }
+  };
+}
 function getStatusIcon(status) {
   switch (status.toLowerCase()) {
     case "approved":
@@ -359,6 +422,9 @@ export function renderStudentView(root, session, onLogout) {
                 <button class="nav-item" data-target="records">
                     <i class="material-icons">history</i> My History
                 </button>
+                <button class="nav-item" data-target="settings">
+                    <i class="material-icons">settings</i> Settings
+                </button>
                 <button class="nav-item logout" id="logoutBtn">
                     <i class="material-icons">logout</i> Logout
                 </button>
@@ -408,7 +474,6 @@ function setupStudentListeners(onLogout, session) {
 
       const target = btn.getAttribute("data-target");
 
-      // FIX: Pass 'session' into these function calls
       if (target === "dashboard") {
         content.innerHTML = renderDashboard(session);
       } else if (target === "book") {
@@ -416,6 +481,10 @@ function setupStudentListeners(onLogout, session) {
         attachBookingListener(session);
       } else if (target === "records") {
         content.innerHTML = renderHistory(session);
+      } 
+      // ADDED: Settings Target
+      else if (target === "settings") {
+        renderSettings(content, session);
       }
     };
   });

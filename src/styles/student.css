@@ -604,3 +604,83 @@ td {
   font-size: 1.1rem;
   color: var(--text-main);
 }
+/* Settings Page Container */
+.settings-form {
+    max-width: 600px;
+    margin-top: 20px;
+}
+
+.settings-form .input-wrapper {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Labels for the inputs */
+.settings-form label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b; /* Subtle Slate Gray */
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Specific styling for the settings inputs */
+.settings-form input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background-color: #f8fafc;
+}
+
+.settings-form input:focus {
+    border-color: #3b82f6;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
+
+/* Row for Course and Section */
+.input-group-row {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+}
+
+.input-group-row .input-wrapper {
+    flex: 1;
+}
+
+/* Save Button Styling */
+.settings-form .primary-btn {
+    margin-top: 10px;
+    width: auto;
+    padding: 12px 30px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.settings-form .primary-btn:hover {
+    background: #2563eb;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+    .input-group-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}
