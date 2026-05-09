@@ -1,8 +1,11 @@
 import { renderLoginPage } from "./auth.js";
 import { renderStudentView } from "./student.js";
-import { renderAdminView } from "./admin.js";
+import { renderGuidanceView } from "./guidance.js";
 import { renderLandingPage } from "./landing.js";
+import { renderAdminView } from "./admin.js"
 import "./styles/styles.css";
+emailjs.init("6_rFpZEVOh3AVEsIM");
+import emailjs from "@emailjs/browser";
 
 const seedUsers = () => {
   const existingUsers = localStorage.getItem("gh_users");
@@ -15,18 +18,26 @@ const seedUsers = () => {
         role: "student",
         name: "Rhae",
         email: "rhae@granby.edu",
-        yearLevel: "3rd Year",
+        yearLevel: "1st Year",
         course: "BSIT",
-        section: "3A",
+        section: "1A"
       },
       {
         id: 2,
-        user: "admin",
+        user: "guidance", // Changed role from admin to guidance
         pass: "123",
-        role: "admin",
-        name: "Mr. Bossbeza", 
-        email: "jellopancake213@gmail.com",
+        role: "guidance", 
+        name: "Ms. Delfin", 
+        email: "santos@granby.edu",
       },
+      {
+        id: 3,
+        user: "admin", // New Super Admin role
+        pass: "admin123",
+        role: "admin",
+        name: "System Administrator",
+        email: "admin@granby.edu",
+      }
     ];
     localStorage.setItem("gh_users", JSON.stringify(initialUsers));
   }
@@ -48,22 +59,18 @@ function handleLogin(identifier, p, showError) {
   );
 
   if (found) {
-    localStorage.setItem(
-      "gh_session",
-      JSON.stringify({
-        id: found.id,
-        name: found.name,
-        role: found.role,
-        email: found.email,
-      }),
-    );
+    // Destructure to remove password from session for security
+    const { pass, ...sessionData } = found;
+    
+    localStorage.setItem("gh_session", JSON.stringify(sessionData));
+    
     initApp();
   } else {
     showError("Invalid username/email or password.");
   }
 }
 
-function handleRegister(name, u, p, email, showError, showSuccess) {
+function handleRegister(name, u, p, email, yl, course, sec, showError, showSuccess) {
   const users = JSON.parse(localStorage.getItem("gh_users")) || [];
   const exists = users.some((user) => user.user === u || user.email === email);
 
@@ -77,24 +84,21 @@ function handleRegister(name, u, p, email, showError, showSuccess) {
     user: u,
     pass: p,
     email,
+    yearLevel: yl,   // Save new field
+    course: course,  // Save new field
+    section: sec,    // Save new field
     role: "student",
   };
 
   users.push(newUser);
   localStorage.setItem("gh_users", JSON.stringify(users));
 
-  // If the showSuccess callback exists (from your auth.js), run it!
   if (showSuccess) {
     showSuccess();
-  } else {
-    // Fallback in case something goes wrong with the callback
-    const root = document.getElementById("app");
-    renderLoginPage(root, handleLogin, handleRegister);
   }
 }
 
 // --- ROUTER ---
-
 function initApp() {
   const root = document.getElementById("app");
   const session = JSON.parse(localStorage.getItem("gh_session"));
@@ -107,10 +111,15 @@ function initApp() {
     });
   } else if (!session) {
     renderLoginPage(root, handleLogin, handleRegister);
-  } else if (session.role === "admin") {
-    renderAdminView(root, session, handleLogout);
   } else {
-    renderStudentView(root, session, handleLogout);
+    // ROUTING LOGIC BASED ON ROLE
+    if (session.role === "admin") {
+      renderAdminView(root, session, handleLogout);
+    } else if (session.role === "guidance") {
+      renderGuidanceView(root, session, handleLogout);
+    } else {
+      renderStudentView(root, session, handleLogout);
+    }
   }
 }
 

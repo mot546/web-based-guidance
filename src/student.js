@@ -268,8 +268,6 @@ export function renderHistory(session = {}) {
     `;
 }
 function renderSettings(container, session) {
-
-
   container.innerHTML = `
     <div class="settings-card">
         <div class="card-header">
@@ -278,20 +276,20 @@ function renderSettings(container, session) {
         <form id="settingsForm" class="settings-form">
             <div class="input-wrapper plain">
                 <label>Full Name</label>
-                <input type="text" id="setName" value="${session.name || ''}" required>
+                <input type="text" id="setName" value="${session.name || ""}" required>
             </div>
             <div class="input-wrapper plain">
                 <label>Email Address</label>
-                <input type="email" id="setEmail" value="${session.email || ''}" required>
+                <input type="email" id="setEmail" value="${session.email || ""}" required>
             </div>
             <div class="input-group-row">
                  <div class="input-wrapper plain">
                     <label>Course</label>
-                    <input type="text" id="setCourse" value="${session.course || ''}" placeholder="e.g. BSIT" required>
+                    <input type="text" id="setCourse" value="${session.course || ""}" placeholder="e.g. BSIT" required>
                 </div>
                 <div class="input-wrapper plain">
                     <label>Section</label>
-                    <input type="text" id="setSection" value="${session.section || ''}" placeholder="e.g. 1A" required>
+                    <input type="text" id="setSection" value="${session.section || ""}" placeholder="e.g. 1A" required>
                 </div>
             </div>
             <button type="submit" class="primary-btn">
@@ -314,7 +312,7 @@ function renderSettings(container, session) {
     };
 
     const users = JSON.parse(localStorage.getItem("gh_users")) || [];
-    const userIndex = users.findIndex(u => u.id === session.id);
+    const userIndex = users.findIndex((u) => u.id === session.id);
 
     if (userIndex !== -1) {
       // Update DB
@@ -326,7 +324,7 @@ function renderSettings(container, session) {
       localStorage.setItem("gh_session", JSON.stringify(newSession));
 
       alert("Profile updated successfully!");
-      window.location.reload(); 
+      window.location.reload();
     }
   };
 }
@@ -481,7 +479,7 @@ function setupStudentListeners(onLogout, session) {
         attachBookingListener(session);
       } else if (target === "records") {
         content.innerHTML = renderHistory(session);
-      } 
+      }
       // ADDED: Settings Target
       else if (target === "settings") {
         renderSettings(content, session);
