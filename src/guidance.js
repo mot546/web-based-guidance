@@ -838,7 +838,7 @@ function getAnalytics() {
     "2nd Year": 0, 
     "3rd Year": 0, 
     "4th Year": 0,
-    "Irregular": 0 
+    "Irregular": 0
   };
   const courseBreakdown = {};
   const statusBreakdown = { pending: 0, approved: 0, rejected: 0 };
