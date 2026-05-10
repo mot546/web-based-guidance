@@ -105,7 +105,7 @@ window.closeModal = () => {
     if (modal) modal.remove();
 };
 
-window.processStatusUpdate = (id, newStatus) => {
+window.processStatusUpdate = async (id, newStatus) => {
     const notes = document.getElementById("modalNotes").value;
     const newTime = document.getElementById("modalTime") ? document.getElementById("modalTime").value : null;
 
@@ -115,14 +115,23 @@ window.processStatusUpdate = (id, newStatus) => {
     }
 
     let appointments = JSON.parse(localStorage.getItem("gh_appointments")) || [];
+    
+    // Find the specific appointment to get student details (Email, Name, etc.)
+    const targetApp = appointments.find(a => a.id === id);
 
+    if (!targetApp) {
+        alert("Appointment not found.");
+        return;
+    }
+
+    // Update local data
     appointments = appointments.map((app) => {
         if (app.id === id) {
             return { 
                 ...app, 
                 status: newStatus,
                 counselorNotes: notes,
-                time: newTime || app.time, // Update time if changed
+                time: newTime || app.time, 
                 updatedAt: new Date().toISOString()
             };
         }
@@ -131,12 +140,36 @@ window.processStatusUpdate = (id, newStatus) => {
 
     localStorage.setItem("gh_appointments", JSON.stringify(appointments));
     
-    // Simulate Email Sending
-    console.log(`Email sent to student regarding ${newStatus} status. Message: ${notes}`);
+    // EmailJS Integration
+    const templateParams = {
+    subject_line: `Update: Your Appointment is ${newStatus.toUpperCase()}`,
+    to_email: targetApp.studentEmail,
+    recipient_name: targetApp.studentName,
+    header_title: "Appointment Status Update",
+    main_message: `Your guidance appointment request has been ${newStatus}. Please see the details and counselor notes below.`,
+    app_type: targetApp.serviceType,
+    app_date: targetApp.date,
+    app_time: newTime || targetApp.time,
+    status: newStatus,
+    notes: notes || "No additional notes provided."
+};
+
+    try {
+        // Replace 'YOUR_SERVICE_ID' and 'YOUR_TEMPLATE_ID' with your actual EmailJS IDs
+        await emailjs.send('service_mtv9cbi', 'template_mublumh', templateParams);
+    } catch (error) {
+        console.error("Failed to send email:", error);
+    }
     
     closeModal();
-    const content = document.getElementById("dynamic-content");
+
+    // Refresh the table UI
+    const content = document.getElementById("admin-dynamic-content");
     if (content) content.innerHTML = renderAppointmentsTable();
+
+    if (window.addNotification) {
+        window.addNotification(`Appointment for ${targetApp.studentName} has been ${newStatus}.`);
+    }
 };
 
 function renderStudentRecords() {
@@ -149,8 +182,10 @@ function renderStudentRecords() {
             <div class="card-header">
                 <h2><i class="material-icons">people</i> Student Directory</h2>
                 <div class="table-tools">
+                    
                     <input type="text" id="studentSearch" placeholder="Search by name, course, or email...">
                 </div>
+                
             </div>
             <div class="table-container">
                 <table id="studentTable">
@@ -192,6 +227,9 @@ function renderStudentRecords() {
                         }
                     </tbody>
                 </table>
+                <button id="printStudentBtn" class="btn-secondary">
+            <i class="material-icons">print</i> Export PDF
+        </button>
             </div>
         </div>
     `;
@@ -204,7 +242,9 @@ function renderReports() {
     <div class="admin-card">
         <div class="card-header">
             <h2><i class="material-icons">insights</i> Guidance Intelligence Dashboard</h2>
-            <p class="subtitle">Comprehensive analysis of counseling volume and student demographics.</p>
+            <button id="printAnalyticsBtn" class="btn-primary">
+            <i class="material-icons">download</i> Generate Report
+        </button>
         </div>
 
         <div class="stats-grid">
@@ -272,21 +312,6 @@ function renderReports() {
         <p style="margin-top: 5px; color: #64748b; font-size: 0.8rem;">Requests per active day</p>
     </div>
 </div>
-
-<div class="report-section">
-    <h3><i class="material-icons">psychology</i> Specific Issue Trends</h3>
-    <div class="chart-container">
-        ${Object.entries(stats.reasonFrequency)
-            .sort((a, b) => b[1] - a[1]) // Show most frequent first
-            .slice(0, 5) // Top 5 categories
-            .map(([reason, count]) => 
-                renderChartRow(reason, count, (count/total)*100, "bg-indigo")
-            ).join('')
-        }
-    </div>
-
-        </div>
-    </div>
   `;
 }
 
@@ -518,7 +543,7 @@ export function renderGuidanceView(root, session, onLogout) {
                     <div class="nav-label">System</div>
                     <button class="nav-item" data-target="settings">
                         <i class="material-icons">settings</i> 
-                        <span>Global Settings</span>
+                        <span>Settings</span>
                     </button>
                 </div>
 
@@ -538,10 +563,22 @@ export function renderGuidanceView(root, session, onLogout) {
                     <span class="status-badge admin-badge">Good day! ${session.name}</span>
                 </div>
                 <div class="header-actions">
-                    <button class="btn-secondary icon-only" id="refreshData" title="Refresh Database">
-                        <i class="material-icons">sync</i>
-                    </button>
-                </div>
+    <div class="notification-wrapper" style="position: relative;">
+        <button class="btn-secondary icon-only" id="notificationBtn" title="Notifications">
+            <i class="material-icons">notifications</i>
+            <span class="notification-badge" id="notifBadge">0</span>
+        </button>
+        <div class="notification-dropdown hidden" id="notificationDropdown">
+            <div class="notif-header">
+                <span>Notifications</span>
+                <button id="clearNotifs">Clear All</button>
+            </div>
+            <div class="notif-body" id="notifBody">
+                <p class="empty-notif">No new notifications</p>
+            </div>
+        </div>
+    </div>
+</div>
             </header>
 
             <section id="admin-dynamic-content">
@@ -588,7 +625,7 @@ function setupAdminListeners(onLogout) {
                 content.innerHTML = renderReports();
             } else if (target === "settings") {
                 content.innerHTML = renderGuidanceSettings();
-                attachSettingsListener(); // Attach listeners specifically for settings form
+                attachSettingsListener(); 
             } else if (target === "logs") {
                 content.innerHTML = renderLogs();
             }
@@ -641,48 +678,43 @@ function setupAdminListeners(onLogout) {
         const otpInput = document.getElementById("otpInput");
 
         if (requestBtn) {
-           requestBtn.onclick = async () => {
-    const newPass = newPassInput.value;
-    if (newPass.length < 8) return alert("Password must be at least 8 characters long.");
+            requestBtn.onclick = async () => {
+                const newPass = newPassInput.value;
+                if (newPass.length < 8) return alert("Password must be at least 8 characters long.");
 
-    // 1. Pull the current session
-    const session = JSON.parse(localStorage.getItem("gh_user_session"));
-    const savedNotification = localStorage.getItem("admin_notification_email");
+                const session = JSON.parse(localStorage.getItem("gh_user_session"));
+                const savedNotification = localStorage.getItem("admin_notification_email");
+                const recipientEmail = savedNotification || (session ? session.email : "jellopancake213@gmail.com");
 
-    // 2. Prioritize: Saved Setting -> Session Email -> Hardcoded Backup
-    // This ensures the variable is NEVER empty, stopping the 422 error.
-    const recipientEmail = savedNotification || (session ? session.email : "jellopancake213@gmail.com");
+                generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+                
+                const now = new Date();
+                const expiryTime = new Date(now.getTime() + 15 * 60000).toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
 
-    console.log("Attempting to send OTP to:", recipientEmail);
+                const templateParams = {
+                    to_email: recipientEmail,
+                    otp_code: generatedOTP,   
+                    time: expiryTime
+                };
 
-    generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    // Inside your requestBtn.onclick
-const now = new Date();
-const expiryTime = new Date(now.getTime() + 15 * 60000).toLocaleTimeString([], { 
-    hour: '2-digit', 
-    minute: '2-digit' 
-});
+                requestBtn.innerText = "Sending OTP...";
+                requestBtn.disabled = true;
 
-const templateParams = {
-    to_email: recipientEmail,
-    otp_code: generatedOTP,   // Matches {{otp_code}} in your HTML
-    time: expiryTime,         // Matches {{time}} in your HTML
-};
-    requestBtn.innerText = "Sending OTP...";
-    requestBtn.disabled = true;
-
-    try {
-        await emailjs.send('service_mtv9cbi', 'template_gbmoria', templateParams);
-        otpContainer.classList.remove("hidden");
-        requestBtn.classList.add("hidden");
-    } catch (error) {
-        console.error("EmailJS Error:", error);
-        alert("Failed to send OTP. Check console for details.");
-        requestBtn.disabled = false;
-        requestBtn.innerText = "Request OTP to Change Password";
-    }
-};
+                try {
+                    await emailjs.send('service_mtv9cbi', 'template_gbmoria', templateParams);
+                    alert(`OTP Sent to ${recipientEmail}`);
+                    otpContainer.classList.remove("hidden");
+                    requestBtn.classList.add("hidden");
+                } catch (error) {
+                    console.error("EmailJS Error:", error);
+                    alert("Failed to send OTP.");
+                    requestBtn.disabled = false;
+                    requestBtn.innerText = "Request OTP to Change Password";
+                }
+            };
         }
 
         if (verifyBtn) {
@@ -690,9 +722,17 @@ const templateParams = {
                 if (otpInput.value.trim() === generatedOTP) {
                     const users = JSON.parse(localStorage.getItem("gh_users")) || [];
                     const adminIndex = users.findIndex(u => u.role === 'guidance');
+                    
                     if (adminIndex !== -1) {
-                        users[adminIndex].password = newPassInput.value;
+                        users[adminIndex].pass = newPassInput.value;
                         localStorage.setItem("gh_users", JSON.stringify(users));
+
+                        const session = JSON.parse(localStorage.getItem("gh_user_session"));
+                        if (session) {
+                            session.pass = newPassInput.value;
+                            localStorage.setItem("gh_user_session", JSON.stringify(session));
+                        }
+
                         alert("Success! Your password has been updated.");
                         otpContainer.classList.add("hidden");
                         newPassInput.value = "";
@@ -706,14 +746,13 @@ const templateParams = {
                 }
             };
         }
-        const toggleButtons = document.querySelectorAll(".settings-card .toggle-password");
 
+        const toggleButtons = document.querySelectorAll(".settings-card .toggle-password");
         toggleButtons.forEach((btn) => {
             btn.onclick = () => {
                 const targetId = btn.getAttribute("data-target");
                 const input = document.getElementById(targetId);
                 const icon = btn.querySelector("i");
-
                 if (input.type === "password") {
                     input.type = "text";
                     icon.innerText = "visibility_off";
@@ -725,12 +764,69 @@ const templateParams = {
         });
     }
 
-    // 4. Global Action Listeners (Ensure these are NOT inside attachSettingsListener)
+    // 4. Notification System Logic
+    const notifBtn = document.getElementById("notificationBtn");
+    const notifDropdown = document.getElementById("notificationDropdown");
+    const notifBadge = document.getElementById("notifBadge");
+    const notifBody = document.getElementById("notifBody");
+    const clearNotifs = document.getElementById("clearNotifs");
+    const appointments = JSON.parse(localStorage.getItem("gh_appointments")) || [];
+    const pendingApps = appointments.filter(app => app.status === "pending");
+
+    
+    if (notifBtn) {
+        notifBtn.onclick = (e) => {
+            e.stopPropagation();
+            notifDropdown.classList.toggle("hidden");
+            if (!notifDropdown.classList.contains("hidden")) {
+                notifBadge.style.display = "none";
+                notifBadge.innerText = "0";
+            }
+        };
+    }
+
+    // Close notification when clicking outside
+    document.addEventListener("click", (e) => {
+        if (notifDropdown && !notifDropdown.contains(e.target)) {
+            notifDropdown.classList.add("hidden");
+        }
+    });
+
+    if (clearNotifs) {
+        clearNotifs.onclick = () => {
+            notifBody.innerHTML = '<p class="empty-notif">No new notifications</p>';
+        };
+    }
+
+    // Global helper to add a notification from anywhere
+    window.addNotification = (message) => {
+        const emptyMsg = notifBody.querySelector(".empty-notif");
+        if (emptyMsg) emptyMsg.remove();
+
+        const notifItem = document.createElement("div");
+        notifItem.className = "notif-item";
+        notifItem.innerHTML = `
+            <p>${message}</p>
+            <small>${new Date().toLocaleTimeString()}</small>
+        `;
+        notifBody.prepend(notifItem);
+
+        const currentCount = parseInt(notifBadge.innerText || 0);
+        notifBadge.innerText = currentCount + 1;
+        notifBadge.style.display = "block";
+    };
+    if (pendingApps.length > 0) {
+        window.addNotification(`You have ${pendingApps.length} pending appointment(s) to review.`);
+    }
+
+    // 5. Global Action Listeners
+    content.addEventListener("click", (e) => {
+        if (e.target.closest("#printStudentBtn")) printReport("students");
+        if (e.target.closest("#printAnalyticsBtn")) printReport("analytics");
+    });
+
     const logoutBtn = document.getElementById("adminLogoutBtn");
     if (logoutBtn) logoutBtn.onclick = onLogout;
-
-    const refreshBtn = document.getElementById("refreshData");
-    if (refreshBtn) refreshBtn.onclick = () => window.location.reload();
 }
 function getAnalytics() {
   const apps = JSON.parse(localStorage.getItem("gh_appointments")) || [];
@@ -758,9 +854,7 @@ function getAnalytics() {
     const date = new Date(app.createdAt || Date.now()).toLocaleDateString();
     dailyTrends[date] = (dailyTrends[date] || 0) + 1;
 
-    // 3. Specific Reason Frequency
-    const reason = app.reason || "General Inquiry";
-    reasonFrequency[reason] = (reasonFrequency[reason] || 0) + 1;
+
 
     // 4. Demographic cross-referencing
     const student = users.find(u => u.email === app.studentEmail);
@@ -776,6 +870,43 @@ function getAnalytics() {
 
   const dates = Object.keys(dailyTrends);
   const avgDaily = dates.length ? (apps.length / dates.length).toFixed(1) : 0;
+
+  // Notification Logic
+const notifBtn = document.getElementById("notificationBtn");
+const notifDropdown = document.getElementById("notificationDropdown");
+const notifBadge = document.getElementById("notifBadge");
+const notifBody = document.getElementById("notifBody");
+
+if (notifBtn) {
+    notifBtn.onclick = (e) => {
+        e.stopPropagation();
+        notifDropdown.classList.toggle("hidden");
+        // Reset badge when opened
+        notifBadge.style.display = "none";
+    };
+}
+
+// Close dropdown when clicking outside
+document.addEventListener("click", () => {
+    if (notifDropdown) notifDropdown.classList.add("hidden");
+});
+
+// Function to add a notification (call this whenever an action happens)
+window.addNotification = (message) => {
+    const emptyMsg = notifBody.querySelector(".empty-notif");
+    if (emptyMsg) emptyMsg.remove();
+
+    const notifItem = document.createElement("div");
+    notifItem.className = "notif-item";
+    notifItem.innerHTML = `
+        <p>${message}</p>
+        <small>${new Date().toLocaleTimeString()}</small>
+    `;
+    notifBody.prepend(notifItem);
+
+    notifBadge.innerText = parseInt(notifBadge.innerText || 0) + 1;
+    notifBadge.style.display = "block";
+};
 
   return {
     totalApps: apps.length,
@@ -795,4 +926,101 @@ function getAnalytics() {
       yearBreakdown[a] > yearBreakdown[b] ? a : b, "N/A"
     )
   };
+}
+
+export function printReport(type) {
+  const stats = getAnalytics();
+  const allUsers = JSON.parse(localStorage.getItem("gh_users")) || [];
+  const students = allUsers.filter((user) => user.role === "student");
+
+  let printContent = "";
+
+  if (type === "analytics") {
+    printContent = `
+      <h1>Guidance Intelligence Report</h1>
+      <p>Generated on: ${new Date().toLocaleString()}</p>
+      
+      <h3>Summary Statistics</h3>
+      <table border="1" style="width:100%; border-collapse: collapse; margin-bottom: 20px;">
+        <thead>
+          <tr style="background: #f1f5f9;">
+            <th>Metric</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Total Requests</td><td>${stats.totalApps}</td></tr>
+          <tr><td>Most Active Year</td><td>${stats.mostActiveYear}</td></tr>
+          <tr><td>Total Students</td><td>${stats.totalStudents}</td></tr>
+          <tr><td>Daily Average</td><td>${stats.avgDaily}</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Volume by Category</h3>
+      <table border="1" style="width:100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: #f1f5f9;">
+            <th>Category</th>
+            <th>Count</th>
+            <th>Percentage</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Academic</td><td>${stats.academic}</td><td>${((stats.academic/stats.totalApps)*100).toFixed(1)}%</td></tr>
+          <tr><td>Personal</td><td>${stats.personal}</td><td>${((stats.personal/stats.totalApps)*100).toFixed(1)}%</td></tr>
+          <tr><td>Career</td><td>${stats.career}</td><td>${((stats.career/stats.totalApps)*100).toFixed(1)}%</td></tr>
+        </tbody>
+      </table>
+    `;
+  } else if (type === "students") {
+    printContent = `
+      <h1>Student Directory Export</h1>
+      <p>Total Registered Students: ${students.length}</p>
+      <table border="1" style="width:100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: #f1f5f9;">
+            <th>Student Name</th>
+            <th>Year Level</th>
+            <th>Course</th>
+            <th>Email</th>
+            <th>ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${students.map(std => `
+            <tr>
+              <td>${std.name}</td>
+              <td>${std.yearLevel || 'N/A'}</td>
+              <td>${std.course || 'N/A'}</td>
+              <td>${std.email}</td>
+              <td>${std.id}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  const win = window.open("", "PRINT", "height=600,width=800");
+  win.document.write(`
+    <html>
+      <head>
+        <title>Export - Granby Gateway</title>
+        <style>
+          body { font-family: sans-serif; padding: 20px; }
+          table { margin-top: 10px; }
+          th, td { padding: 8px; text-align: left; }
+          h1 { color: #1e293b; }
+          @media print { .no-print { display: none; } }
+        </style>
+      </head>
+      <body>${printContent}</body>
+    </html>
+  `);
+  win.document.close();
+  win.focus();
+  setTimeout(() => {
+    win.print();
+    win.close();
+  }, 500);
 }

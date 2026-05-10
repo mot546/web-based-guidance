@@ -349,7 +349,6 @@ function attachBookingListener(session) {
   form.onsubmit = (e) => {
     e.preventDefault();
     const submitBtn = document.getElementById("submitBooking");
-    const errorBanner = document.getElementById("booking-error");
 
     const newApp = {
       id: Date.now(),
@@ -370,21 +369,32 @@ function attachBookingListener(session) {
     const allApps = JSON.parse(localStorage.getItem("gh_appointments")) || [];
     allApps.push(newApp);
     localStorage.setItem("gh_appointments", JSON.stringify(allApps));
+    const users = JSON.parse(localStorage.getItem("gh_users")) || [];
 
     // 2. Send via EmailJS (Optional/Integration)
-    const adminEmail =
-      localStorage.getItem("admin_notification_email") || "admin@granby.edu";
+    const guidanceEmails = users
+  .filter(u => u.role === "guidance")
+  .map(u => u.email) // Create an array of just the emails
+  .join(",");
 
-    emailjs
-      .send("service_mtv9cbi", "template_mublumh", {
-        to_email: adminEmail, // Ensure this is a real email in your localStorage settings!
-        from_name: session.name,
-        from_email: session.email,
-        app_type: newApp.type,
-        app_date: newApp.date,
-        app_time: newApp.time,
-        message: newApp.notes,
-      })
+    emailjs.send("service_mtv9cbi", "template_mublumh", {
+    subject_line: "New Appointment Request - " + session.name,
+    to_email: guidanceEmails, 
+    recipient_name: "Guidance Admin",
+    
+    // 2. Dynamic Content
+    header_title: "New Appointment Request",
+    main_message: `A new appointment request has been submitted by ${session.name}. Please review the details below.`,
+    
+    // 3. Table Data
+    app_type: newApp.type,
+    app_date: newApp.date,
+    app_time: newApp.time,
+    status: "Pending", // Default for new requests
+    
+    // 4. Student Notes
+    notes: newApp.notes || "No notes provided by student."
+})
       .then((res) => {
         console.log("Email Sent Successfully!", res.status, res.text);
         alert("Success! Appointment booked and Admin notified.");

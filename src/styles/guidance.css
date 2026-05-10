@@ -313,166 +313,6 @@ td {
   background: #f59e0b;
 }
 
-/* --- COMPREHENSIVE MOBILE OVERHAUL --- */
-@media screen and (max-width: 768px) {
-  /* 1. Fix the Sidebar & Content Area overlap */
-  .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative; /* Removes the "float" over content */
-    padding: 1rem;
-  }
-
-  .content-area {
-    margin-left: 0 !important; /* Removes the 280px gap */
-    padding: 15px;
-  }
-
-  /* 2. Fix Search Input Squashing */
-  .table-header-main {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 15px;
-  }
-
-  #tableSearch {
-    width: 100%;
-    padding: 12px;
-    box-sizing: border-box;
-  }
-
-  /* 3. The "Card" Transformation */
-  table,
-  thead,
-  tbody,
-  th,
-  td,
-  tr {
-    display: block;
-    width: 100%;
-  }
-
-  thead {
-    display: none; /* Hide headers on mobile */
-  }
-
-  tr {
-    background: white;
-    margin-bottom: 20px;
-    padding: 15px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    border: 1px solid #f1f5f9;
-  }
-
-  /* 4. Column Alignment (Label Left, Value Right) */
-  td {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0 !important;
-    border-bottom: 1px solid #f8fafc;
-    text-align: right;
-  }
-
-  td:last-child {
-    border-bottom: none;
-  }
-
-  /* 5. Injecting the Labels */
-  td::before {
-    content: attr(data-label);
-    font-weight: 800;
-    color: #94a3b8;
-    text-transform: uppercase;
-    font-size: 0.7rem;
-    text-align: left;
-    flex-shrink: 0;
-  }
-
-  /* 6. Alignment for inner elements */
-  .user-info,
-  .date-info,
-  .action-btns {
-    align-items: flex-end;
-    text-align: right;
-  }
-
-  .action-btns {
-    flex-direction: row; /* Buttons stay side-by-side */
-    gap: 10px;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  /* 1. Remove that big white space at the top */
-  .admin-container {
-    display: block; /* Changes from flex to block for mobile stack */
-    min-height: 100vh;
-  }
-
-  /* 2. Fix the Sidebar to the Bottom (The App Look) */
-  .sidebar {
-    position: fixed !important; /* Force it to stay put */
-    bottom: 0 !important;
-    top: auto !important;
-    left: 0;
-    width: 100% !important;
-    height: 65px !important;
-    background: #ffffff !important;
-    display: flex !important;
-    flex-direction: row !important; /* Align buttons horizontally */
-    justify-content: space-around;
-    align-items: center;
-    padding: 0 !important;
-    margin: 0 !important;
-    border-top: 1px solid #e2e8f0;
-    z-index: 9999; /* Ensure it's above everything */
-  }
-
-  /* 3. Style the buttons so they fit the bar */
-  .sidebar-btn {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 5px 0 !important;
-    margin: 0 !important;
-    gap: 2px !important;
-    font-size: 10px !important;
-    color: #64748b;
-    background: none;
-    border: none;
-  }
-
-  .sidebar-btn i {
-    font-size: 20px !important;
-    margin: 0 !important;
-  }
-
-  .sidebar-btn.active {
-    color: #3b82f6 !important;
-    background: none !important;
-    box-shadow: none !important;
-  }
-
-  /* 4. Fix the Content Area whitespace */
-  .content-area {
-    margin-left: 0 !important; /* Removes the sidebar gap */
-    padding: 15px !important;
-    padding-bottom: 80px !important; /* Prevents nav from covering data */
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  /* 5. Hide the Header text in the sidebar on mobile */
-  .sidebar-header,
-  .view-header h1 {
-    display: none;
-  }
-}
-
 /* UI Enhancement for Bars */
 .trend-bars {
     display: flex;
@@ -767,4 +607,147 @@ td {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    border: 2px solid white;
+    display: none;
+}
+
+.notification-dropdown {
+    position: absolute;
+    right: 0;
+    top: 45px;
+    width: 280px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    border: 1px solid #e2e8f0;
+}
+
+.notif-header {
+    padding: 10px 15px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+}
+
+.notif-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f8fafc;
+    font-size: 0.85rem;
+}
+
+.notif-item:hover { background: #f8fafc; }
+.hidden { display: none; }
+
+/* --- COMPREHENSIVE MOBILE OVERHAUL --- */
+@media screen and (max-width: 768px) {
+  /* 1. Force sidebar to be a horizontal row container */
+  .sidebar {
+    width: 100% !important;
+    height: auto !important;
+    display: flex !important;
+    flex-direction: row !important; /* Items sit side-by-side */
+    justify-content: space-between !important;
+    align-items: center !important;
+    border-bottom: 1px solid #e2e8f0;
+    background: white !important;
+  }
+
+  /* 2. Wrap and align the nav-group in a row */
+  .nav-group {
+    position: sticky !important;
+    display: flex !important;
+    flex-direction: row !important; 
+    flex: 1; /* Takes up available space */
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: nowrap; /* Prevents items from jumping to a new line */
+  }
+
+  .nav-item, .logout, .sidebar-btn {
+    padding: 5px !important; /* Smaller clickable area */
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  /* 3. Make the Icons smaller */
+  .nav-item i, 
+  .logout i, 
+  .sidebar-btn i,
+  .material-icons {
+    font-size: 18px !important; /* Smaller icons */
+  }
+
+  /* 3. Force Logout/Footer to stay in the same row */
+  .sidebar-footer, 
+  .logout-container {
+    display: flex !important;
+    flex-direction: row !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .logout {
+    margin: 0 !important;
+    padding: 10px !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 4. Hide all text labels and extra menu UI */
+  .notification-wrapper,
+  .sidebar-header, 
+  .sidebar h2, 
+  .nav-label, 
+  .sidebar-search, 
+  .search-container,
+  #globalNavSearch,
+  hr, 
+  .sidebar-footer p {
+    display: none !important;
+  }
+
+  /* 5. Appointment Card content fix for long emails */
+  .content-area {
+    margin-left: 0 !important;
+    padding: 15px !important;
+  }
+
+  tr {
+    display: block;
+    background: white;
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+  }
+
+  td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0 !important;
+    border-bottom: 1px solid #f8fafc;
+    word-break: break-all; /* Ensures emails wrap inside the card */
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+  }
 }
